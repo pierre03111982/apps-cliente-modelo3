@@ -386,12 +386,13 @@ export default function ResultadoPage() {
 
   return (
     <div className="relative min-h-screen w-screen overflow-hidden">
-      {/* Imagem de Fundo */}
-      <div className="fixed inset-0 z-0">
+      {/* Imagem de Fundo - Fixa sem redimensionar */}
+      <div className="fixed inset-0 z-0 overflow-hidden">
         <img
           src={CLOSET_BACKGROUND_IMAGE}
           alt="Guarda-roupa de luxo"
-          className="h-full w-full object-cover blur-[2px] brightness-50"
+          className="absolute inset-0 h-full w-full object-cover blur-[2px] brightness-50"
+          style={{ objectFit: 'cover', objectPosition: 'center', minHeight: '100vh', minWidth: '100vw' }}
         />
       </div>
 
@@ -495,33 +496,38 @@ export default function ResultadoPage() {
                     <div className="absolute bottom-2 right-2 flex flex-col gap-1.5 z-10">
                       {selectedProducts.map((produto, index) => (
                         <div key={produto.id || index} className="relative">
-                          {/* Moldura Externa - Contínua */}
-                          <div className="relative rounded-lg border-2 border-white/50 p-1 shadow-xl bg-white/90 backdrop-blur-sm">
-                            {/* Moldura Interna - Pontilhada */}
-                            <div className="relative border-2 border-dashed border-white/30 rounded-md p-0.5 bg-white overflow-hidden">
+                          {/* Moldura Externa - Contínua - Justa à imagem */}
+                          <div className="relative rounded border-2 border-white/50 shadow-xl bg-white/90 backdrop-blur-sm">
+                            {/* Moldura Interna - Pontilhada - Justa à imagem */}
+                            <div className="relative border-2 border-dashed border-white/30 rounded bg-white overflow-hidden">
                               {/* Imagem do Produto */}
                               {produto.imagemUrl ? (
-                                <div className="relative aspect-square w-12">
+                                <div className="relative w-12 h-12">
                                   <Image
                                     src={produto.imagemUrl}
                                     alt={produto.nome || `Produto ${index + 1}`}
-                                    fill
-                                    className="object-cover rounded"
+                                    width={48}
+                                    height={48}
+                                    className="object-cover"
                                   />
                                 </div>
                               ) : (
-                                <div className="relative aspect-square w-12 bg-gray-200 flex items-center justify-center rounded">
+                                <div className="relative w-12 h-12 bg-gray-200 flex items-center justify-center">
                                   <span className="text-[6px] text-gray-500">Sem imagem</span>
                                 </div>
                               )}
-                              {/* Informações do Produto */}
-                              <div className="p-0.5 bg-white">
-                                <h3 className="text-left text-[6px] font-semibold text-gray-900 line-clamp-1 mb-0 leading-tight">
-                                  {produto.nome || `Produto ${index + 1}`}
+                              {/* Informações do Produto - Reduzidas e truncadas */}
+                              <div className="px-0.5 py-0.5 bg-white">
+                                <h3 className="text-left text-[4px] font-semibold text-gray-900 line-clamp-1 mb-0 leading-tight truncate" title={produto.nome || `Produto ${index + 1}`}>
+                                  {produto.nome && produto.nome.length > 12 
+                                    ? `${produto.nome.substring(0, 12)}...` 
+                                    : produto.nome || `Produto ${index + 1}`}
                                 </h3>
                                 {produto.preco && (
-                                  <p className="text-left text-[6px] font-bold text-blue-600">
-                                    {formatPrice(produto.preco)}
+                                  <p className="text-left text-[4px] font-bold text-blue-600 truncate">
+                                    {formatPrice(produto.preco).length > 8 
+                                      ? `${formatPrice(produto.preco).substring(0, 8)}...` 
+                                      : formatPrice(produto.preco)}
                                   </p>
                                 )}
                               </div>
