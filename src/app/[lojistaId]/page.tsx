@@ -27,35 +27,26 @@ export default function ClienteAppPage() {
     
     setIsRedirecting(true)
     
-    // Verificar login e redirecionar
+    // Verificar login e redirecionar imediatamente
     const checkLogin = () => {
       try {
         const stored = localStorage.getItem(`cliente_${id}`)
         if (!stored) {
-          router.push(`/${id}/login`)
+          router.replace(`/${id}/login`)
           return
         }
         // Se estiver logado, redirecionar para experimentar
-        router.push(`/${id}/experimentar`)
+        router.replace(`/${id}/experimentar`)
       } catch (error) {
         console.error("[ClienteAppPage] Erro ao verificar login:", error)
-        router.push(`/${id}/login`)
+        router.replace(`/${id}/login`)
       }
     }
     
-    // Pequeno delay para garantir que o router está pronto
-    setTimeout(checkLogin, 100)
+    // Redirecionar imediatamente sem delay
+    checkLogin()
   }, [params, router, isRedirecting])
   
-  // Mostrar loading enquanto redireciona
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">
-      <div className="text-center">
-        <div className="mb-4 text-lg">Carregando...</div>
-        {lojistaId && (
-          <div className="text-sm text-gray-400">Redirecionando para {lojistaId}</div>
-        )}
-      </div>
-    </div>
-  )
+  // Redirecionar sem mostrar tela de loading
+  return null
 }

@@ -14,7 +14,7 @@ export default function LoginPage() {
   const lojistaId = params?.lojistaId as string
 
   const [lojistaData, setLojistaData] = useState<LojistaData | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [mode, setMode] = useState<"login" | "register">("login")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -64,7 +64,7 @@ export default function LoginPage() {
     return whatsappValid && passwordValid
   }
 
-  // Carregar dados da loja
+  // Carregar dados da loja (em background, sem bloquear a UI)
   useEffect(() => {
     if (!lojistaId) return
 
@@ -74,11 +74,10 @@ export default function LoginPage() {
         setLojistaData(data)
       } catch (err) {
         console.error("[LoginPage] Erro ao carregar dados da loja:", err)
-      } finally {
-        setIsLoading(false)
       }
     }
 
+    // Carregar em background sem mostrar loading
     loadLojistaData()
   }, [lojistaId])
 
@@ -206,14 +205,6 @@ export default function LoginPage() {
     } finally {
       setIsSubmitting(false)
     }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="relative h-screen w-screen flex items-center justify-center">
-        <div className="text-white text-xl">Carregando...</div>
-      </div>
-    )
   }
 
   return (
