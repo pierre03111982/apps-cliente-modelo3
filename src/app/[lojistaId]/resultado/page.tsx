@@ -403,6 +403,8 @@ export default function ResultadoPage() {
 
   // Voltar para início
   const handleGoHome = () => {
+    // Limpar produtos selecionados do sessionStorage
+    sessionStorage.removeItem(`products_${lojistaId}`)
     router.push(`/${lojistaId}/experimentar`)
   }
 
@@ -438,7 +440,11 @@ export default function ResultadoPage() {
         {hasVoted && (
           <div className="flex items-center justify-start p-4 md:p-6">
             <button
-              onClick={() => router.back()}
+              onClick={() => {
+                // Limpar produtos selecionados do sessionStorage ao voltar
+                sessionStorage.removeItem(`products_${lojistaId}`)
+                router.back()
+              }}
               className="rounded-full bg-white/10 p-2 text-white backdrop-blur-sm transition hover:bg-white/20"
             >
               <ArrowLeft className="h-6 w-6" />

@@ -138,18 +138,10 @@ export default function ExperimentarPage() {
       setUserPhotoUrl(savedPhotoUrl)
     }
 
-    // Carregar produtos selecionados do sessionStorage
-    const savedProducts = sessionStorage.getItem(`products_${lojistaId}`)
-    if (savedProducts) {
-      try {
-        const products = JSON.parse(savedProducts)
-        if (Array.isArray(products) && products.length > 0) {
-          setSelectedProducts(products)
-        }
-      } catch (err) {
-        console.error("[ExperimentarPage] Erro ao carregar produtos do sessionStorage:", err)
-      }
-    }
+    // Limpar produtos selecionados quando volta da Tela 3
+    // Os produtos precisam ser selecionados novamente
+    sessionStorage.removeItem(`products_${lojistaId}`)
+    setSelectedProducts([])
   }, [lojistaId, router, userPhotoUrl])
 
   // Carregar favoritos
