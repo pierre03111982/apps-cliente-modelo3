@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Forçar renderização dinâmica para evitar erro de build estático
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/cliente/share
  * Proxy para criar link de compartilhamento no backend (paineladm)

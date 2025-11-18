@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 const DEFAULT_LOCAL_BACKEND = "http://localhost:3000";
 
+// Forçar renderização dinâmica para evitar erro de build estático
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();

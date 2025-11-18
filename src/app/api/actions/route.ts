@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Forçar renderização dinâmica para evitar erro de build estático
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/actions
  * Proxy para registrar ações do cliente no backend (paineladm)

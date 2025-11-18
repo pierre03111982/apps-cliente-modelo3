@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 const DEFAULT_LOCAL_BACKEND = "http://localhost:3000";
 
+// Forçar renderização dinâmica para evitar erro de build estático
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const lojistaId = request.nextUrl.searchParams.get("lojistaId");
 

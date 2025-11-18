@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Forçar renderização dinâmica para evitar erro de build estático
+export const dynamic = 'force-dynamic';
+
 /**
  * Proxy para o backend (paineladm) responsável por:
  *  - Gerar e armazenar o código de verificação no Firestore
