@@ -20,9 +20,9 @@ const nextConfig = {
       },
     ],
   },
-  // Garantir que a página raiz seja renderizada corretamente
-  trailingSlash: false,
-  // Desabilitar otimizações que podem causar problemas com rotas dinâmicas
+  // Garantir que a página raiz seja gerada estaticamente
+  output: 'standalone',
+  // Desabilitar otimizações que podem causar problemas
   experimental: {
     missingSuspenseWithCSRBailout: false,
   },

@@ -1,28 +1,20 @@
 export const dynamic = 'force-static'
-export const revalidate = false
+export const revalidate = 3600
 
 export default function HomePage() {
   return (
-    <div style={{
-      display: 'flex',
-      minHeight: '100vh',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: '#111827',
-      color: '#ffffff',
-      padding: '20px'
-    }}>
-      <div style={{ textAlign: 'center', maxWidth: '600px' }}>
-        <h1 style={{ marginBottom: '16px', fontSize: '24px', fontWeight: 'bold' }}>
+    <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white px-4">
+      <div className="text-center max-w-2xl">
+        <h1 className="mb-4 text-2xl md:text-3xl font-bold">
           Experimente AI - Modelo 1
         </h1>
-        <p style={{ marginBottom: '8px', color: '#9CA3AF' }}>
+        <p className="mb-2 text-gray-400 text-lg">
           Acesse o aplicativo usando o link completo com o ID da loja:
         </p>
-        <p style={{ fontSize: '14px', color: '#6B7280', wordBreak: 'break-all' }}>
+        <p className="text-sm text-gray-500 break-all mb-6">
           https://apps-cliente-modelo1.vercel.app/[lojistaId]/login
         </p>
-        <div style={{ marginTop: '24px', fontSize: '12px', color: '#6B7280' }}>
+        <div className="mt-6 text-xs text-gray-500">
           <p>Exemplo: https://apps-cliente-modelo1.vercel.app/seu-lojista-id/login</p>
         </div>
       </div>
