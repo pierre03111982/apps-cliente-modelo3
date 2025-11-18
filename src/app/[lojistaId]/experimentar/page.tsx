@@ -394,7 +394,7 @@ export default function ExperimentarPage() {
 
   const handleShareApp = async () => {
     aplicarDesconto()
-    
+
     const appLink = `${window.location.origin}/${lojistaId}`
     const shareText = lojistaData?.nome 
       ? `Confira os looks incríveis da ${lojistaData.nome}! ${appLink}`
@@ -402,14 +402,38 @@ export default function ExperimentarPage() {
 
     if (navigator.share) {
       try {
-        await navigator.share({
+        const shareData: any = {
           title: lojistaData?.nome || "Experimente AI",
           text: shareText,
           url: appLink,
-        })
-      } catch (error) {
-        // Usuário cancelou ou erro ao compartilhar
-        console.log("Compartilhamento cancelado ou erro:", error)
+        }
+
+        // Tentar incluir a imagem da loja se disponível
+        if (lojistaData?.logoUrl) {
+          try {
+            const response = await fetch(lojistaData.logoUrl)
+            const blob = await response.blob()
+            const file = new File([blob], "logo.jpg", { type: blob.type })
+            shareData.files = [file]
+          } catch (error) {
+            console.warn("Não foi possível incluir logo no compartilhamento:", error)
+          }
+        }
+
+        await navigator.share(shareData)
+      } catch (error: any) {
+        if (error.name !== "AbortError") {
+          // Usuário cancelou ou erro ao compartilhar
+          console.log("Compartilhamento cancelado ou erro:", error)
+          // Fallback: copiar para área de transferência
+          try {
+            await navigator.clipboard.writeText(appLink)
+            alert("Link copiado para a área de transferência!")
+          } catch (clipboardError) {
+            console.error("Erro ao copiar link:", clipboardError)
+            alert(`Link do aplicativo: ${appLink}`)
+          }
+        }
       }
     } else {
       // Fallback: copiar para área de transferência
@@ -622,27 +646,34 @@ export default function ExperimentarPage() {
                         {produto.nome}
                       </h3>
                       <div className="flex flex-col gap-0.5">
-                        {descontoAplicado && lojistaData?.descontoRedesSociais ? (
-                          <>
-                            <p className="text-left text-[9px] text-gray-400 line-through">
-                              {formatPrice(produto.preco)}
-                            </p>
-                            <div className="flex items-center gap-0.5 flex-wrap">
-                              <p className="text-left text-[10px] font-bold text-yellow-500">
-                                {formatPrice(produto.preco ? produto.preco * (1 - (lojistaData.descontoRedesSociais / 100)) : 0)}
-                              </p>
-                              <p className="text-left text-[7px] font-semibold text-green-600 leading-tight">
-                                Desconto aplicado
-                              </p>
-                            </div>
-                          </>
-                        ) : (
-                          <>
+                        {(() => {
+                          const desconto = lojistaData?.descontoRedesSociais
+                          const expiraEm = lojistaData?.descontoRedesSociaisExpiraEm
+                          const descontoValido = desconto && desconto > 0 && (!expiraEm || new Date(expiraEm) >= new Date())
+                          
+                          if (descontoAplicado && descontoValido) {
+                            return (
+                              <>
+                                <p className="text-left text-[9px] text-gray-400 line-through">
+                                  {formatPrice(produto.preco)}
+                                </p>
+                                <div className="flex items-center gap-0.5 flex-wrap">
+                                  <p className="text-left text-[10px] font-bold text-yellow-500">
+                                    {formatPrice(produto.preco ? produto.preco * (1 - (desconto / 100)) : 0)}
+                                  </p>
+                                  <p className="text-left text-[7px] font-semibold text-green-600 leading-tight">
+                                    Desconto aplicado
+                                  </p>
+                                </div>
+                              </>
+                            )
+                          }
+                          return (
                             <p className="text-left text-[10px] font-bold text-blue-600">
                               {formatPrice(produto.preco)}
                             </p>
-                          </>
-                        )}
+                          )
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -720,16 +751,39 @@ export default function ExperimentarPage() {
                   <Share2 className="h-5 w-5" />
                 </button>
               </div>
-              <p className="text-sm font-semibold text-white text-center">
-                <span className="text-yellow-400 font-bold">GANHE</span> <span className="text-xl md:text-2xl font-bold text-yellow-400">{lojistaData?.descontoRedesSociais || 10}%</span> de <span className="text-yellow-400 font-bold">DESCONTO</span> em Todos os Produtos!
-              </p>
-              {descontoAplicado && (
-                <>
-                  <p className="text-xs font-semibold text-green-400 text-center animate-pulse">
-                    ✓ Desconto aplicado!
-                  </p>
-                </>
-              )}
+              {/* Mostrar desconto apenas se houver valor cadastrado e não expirado */}
+              {(() => {
+                const desconto = lojistaData?.descontoRedesSociais
+                const expiraEm = lojistaData?.descontoRedesSociaisExpiraEm
+                
+                // Verificar se há desconto válido
+                if (!desconto || desconto <= 0) {
+                  return null // Não mostrar se não houver desconto ou for 0
+                }
+                
+                // Verificar se expirou
+                if (expiraEm) {
+                  const dataExpiracao = new Date(expiraEm)
+                  const agora = new Date()
+                  if (dataExpiracao < agora) {
+                    return null // Não mostrar se expirou
+                  }
+                }
+                
+                // Mostrar desconto
+                return (
+                  <>
+                    <p className="text-sm font-semibold text-white text-center">
+                      <span className="text-yellow-400 font-bold">GANHE</span> <span className="text-xl md:text-2xl font-bold text-yellow-400">{desconto}%</span> de <span className="text-yellow-400 font-bold">DESCONTO</span> em Todos os Produtos!
+                    </p>
+                    {descontoAplicado && (
+                      <p className="text-xs font-semibold text-green-400 text-center animate-pulse">
+                        ✓ Desconto aplicado!
+                      </p>
+                    )}
+                  </>
+                )
+              })()}
             </div>
           </div>
 
@@ -796,27 +850,34 @@ export default function ExperimentarPage() {
                           {produto.nome}
                         </h3>
                         <div className="mt-1 flex flex-col gap-0.5">
-                          {descontoAplicado && lojistaData?.descontoRedesSociais ? (
-                            <>
-                              <p className="text-left text-xs text-gray-400 line-through">
-                                {formatPrice(produto.preco)}
-                              </p>
-                              <div className="flex items-center gap-2">
-                                <p className="text-left text-sm font-bold text-yellow-500">
-                                  {formatPrice(produto.preco ? produto.preco * (1 - (lojistaData.descontoRedesSociais / 100)) : 0)}
-                                </p>
-                                <p className="text-left text-[10px] font-semibold text-green-600">
-                                  Desconto aplicado
-                                </p>
-                              </div>
-                            </>
-                          ) : (
-                            <>
+                          {(() => {
+                            const desconto = lojistaData?.descontoRedesSociais
+                            const expiraEm = lojistaData?.descontoRedesSociaisExpiraEm
+                            const descontoValido = desconto && desconto > 0 && (!expiraEm || new Date(expiraEm) >= new Date())
+                            
+                            if (descontoAplicado && descontoValido) {
+                              return (
+                                <>
+                                  <p className="text-left text-xs text-gray-400 line-through">
+                                    {formatPrice(produto.preco)}
+                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-left text-sm font-bold text-yellow-500">
+                                      {formatPrice(produto.preco ? produto.preco * (1 - (desconto / 100)) : 0)}
+                                    </p>
+                                    <p className="text-left text-[10px] font-semibold text-green-600">
+                                      Desconto aplicado
+                                    </p>
+                                  </div>
+                                </>
+                              )
+                            }
+                            return (
                               <p className="text-left text-sm font-bold text-blue-600">
                                 {formatPrice(produto.preco)}
                               </p>
-                            </>
-                          )}
+                            )
+                          })()}
                         </div>
                       </div>
                       {isSelected && (

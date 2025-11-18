@@ -363,7 +363,7 @@ export default function ResultadoPage() {
     await registerAction("share")
 
     const shareUrl = `${window.location.origin}/${lojistaId}`
-    const shareText = `Confira este look incrível da ${lojistaData?.nome || "loja"}!`
+    const shareText = `Confira este look incrível da ${lojistaData?.nome || "loja"}! ${shareUrl}`
 
     if (navigator.share) {
       try {
@@ -373,7 +373,7 @@ export default function ResultadoPage() {
           url: shareUrl,
         }
 
-        // Tentar incluir a imagem se possível
+        // Tentar incluir a imagem gerada se possível
         if (currentLook.imagemUrl) {
           try {
             const response = await fetch(currentLook.imagemUrl)
@@ -399,7 +399,7 @@ export default function ResultadoPage() {
       navigator.clipboard.writeText(shareUrl)
       alert("Link copiado para a área de transferência!")
     }
-  }, [currentLookIndex, looks, lojistaId, lojistaData])
+  }, [currentLookIndex, looks, lojistaId, lojistaData, registerAction])
 
   // Handle checkout
   const handleCheckout = useCallback(async () => {
