@@ -231,8 +231,17 @@ export default function ExperimentarPage() {
   const handleRemovePhoto = () => {
     setUserPhoto(null)
     setUserPhotoUrl(null)
+    sessionStorage.removeItem(`photo_${lojistaId}`)
     if (document.getElementById("photo-upload") as HTMLInputElement) {
       (document.getElementById("photo-upload") as HTMLInputElement).value = ""
+    }
+  }
+
+  // Trocar foto - permite selecionar nova foto mesmo quando já existe uma
+  const handleChangePhoto = () => {
+    const input = document.getElementById("photo-upload") as HTMLInputElement
+    if (input) {
+      input.click()
     }
   }
 
@@ -432,13 +441,13 @@ export default function ExperimentarPage() {
           <div className="mb-4 flex items-center justify-center gap-3">
             <div className="rounded-xl border border-white/30 bg-white/10 backdrop-blur-lg px-4 py-3 shadow-xl flex items-center gap-3">
               {lojistaData?.logoUrl && (
-                <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-white/30">
+                <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-white/30 flex-shrink-0">
                   <Image
                     src={lojistaData.logoUrl}
                     alt={lojistaData.nome || "Logo"}
-                    width={40}
-                    height={40}
-                    className="h-full w-full object-cover"
+                    width={64}
+                    height={64}
+                    className="h-full w-full object-contain"
                   />
                 </div>
               )}
@@ -449,7 +458,7 @@ export default function ExperimentarPage() {
           </div>
 
           {/* Upload de Foto e Área Personalize o seu Look */}
-          <div className={`mb-6 flex items-stretch gap-4 ${userPhotoUrl ? 'justify-start' : 'justify-center'}`}>
+          <div className={`mb-6 flex items-stretch gap-4 ${userPhotoUrl ? 'justify-center' : 'justify-center'}`}>
             {/* Upload de Foto - Sem caixa externa, apenas moldura dupla */}
             <div className={`${userPhotoUrl ? 'max-w-[42%]' : 'w-full'}`}>
               {userPhotoUrl ? (
@@ -461,16 +470,33 @@ export default function ExperimentarPage() {
                       <img
                         src={userPhotoUrl}
                         alt="Sua foto"
-                        className="h-auto w-auto max-w-full object-contain block rounded-lg"
+                        className="h-auto w-auto max-w-full object-contain block rounded-lg cursor-pointer"
+                        onClick={handleChangePhoto}
+                        title="Clique para trocar a foto"
                       />
                     </div>
                   </div>
                   <button
                     onClick={handleRemovePhoto}
                     className="absolute right-3 top-3 rounded-full bg-red-500/80 p-2 text-white transition hover:bg-red-600 z-10"
+                    title="Remover foto"
                   >
                     <X className="h-5 w-5" />
                   </button>
+                  <button
+                    onClick={handleChangePhoto}
+                    className="absolute right-3 bottom-3 rounded-full bg-blue-500/80 p-2 text-white transition hover:bg-blue-600 z-10"
+                    title="Trocar foto"
+                  >
+                    <Camera className="h-5 w-5" />
+                  </button>
+                  <input
+                    id="photo-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
                 </div>
               ) : (
                 <label
@@ -495,7 +521,7 @@ export default function ExperimentarPage() {
 
             {/* Área: Personalize o seu Look - Ao lado da foto */}
             {userPhotoUrl && (
-              <div className="flex-1 self-stretch rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg p-4 md:p-5 shadow-xl flex flex-col min-h-0">
+              <div className="flex-1 self-stretch rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg p-4 md:p-5 shadow-xl flex flex-col min-h-0 max-w-[42%]">
                 <div className="mb-4 shrink-0">
                   <div className="rounded-lg border-2 border-white/50 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 p-3 shadow-lg">
                     <h2 className="text-center text-base md:text-lg font-black text-white uppercase tracking-wide" style={{ fontFamily: 'Inter, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
@@ -556,15 +582,23 @@ export default function ExperimentarPage() {
             )}
           </div>
 
-          {/* Caixa com Produtos Selecionados - Abaixo da Foto Upload */}
+          {/* Caixa com Produtos Selecionados - Abaixo da Foto Upload - Reduzida 30% */}
           {userPhotoUrl && selectedProducts.length > 0 && (
-            <div className="mb-6 rounded-xl border border-white/30 bg-white/10 backdrop-blur-lg p-4 shadow-xl">
-              <h3 className="mb-3 text-center text-sm font-bold text-white">
+            <div className="mb-6 rounded-xl border border-white/30 bg-white/10 backdrop-blur-lg p-2.5 shadow-xl" style={{ width: '70%', maxWidth: '70%', marginLeft: 'auto', marginRight: 'auto' }}>
+              <h3 className="mb-2 text-center text-xs font-bold text-white">
                 Produtos Selecionados
               </h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 {selectedProducts.map((produto, index) => (
-                  <div key={produto.id || index} className="rounded-lg border-2 border-white/30 bg-white overflow-hidden shadow-lg">
+                  <div key={produto.id || index} className="rounded-lg border-2 border-white/30 bg-white overflow-hidden shadow-lg relative">
+                    {/* Botão para remover produto */}
+                    <button
+                      onClick={() => toggleProductSelection(produto)}
+                      className="absolute right-1 top-1 z-10 rounded-full bg-red-500/80 p-1 text-white transition hover:bg-red-600"
+                      title="Remover produto"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
                     {/* Imagem do Produto */}
                     {produto.imagemUrl && (
                       <div className="relative aspect-square w-full">
@@ -577,28 +611,28 @@ export default function ExperimentarPage() {
                       </div>
                     )}
                     {/* Informações do Produto */}
-                    <div className="p-2 bg-white">
-                      <h3 className="text-left text-xs font-semibold text-gray-900 line-clamp-2 mb-1 leading-tight">
+                    <div className="p-1.5 bg-white">
+                      <h3 className="text-left text-[10px] font-semibold text-gray-900 line-clamp-2 mb-0.5 leading-tight">
                         {produto.nome}
                       </h3>
                       <div className="flex flex-col gap-0.5">
                         {descontoAplicado && lojistaData?.descontoRedesSociais ? (
                           <>
-                            <p className="text-left text-[10px] text-gray-400 line-through">
+                            <p className="text-left text-[9px] text-gray-400 line-through">
                               {formatPrice(produto.preco)}
                             </p>
-                            <div className="flex items-center gap-1 flex-wrap">
-                              <p className="text-left text-xs font-bold text-yellow-500">
+                            <div className="flex items-center gap-0.5 flex-wrap">
+                              <p className="text-left text-[10px] font-bold text-yellow-500">
                                 {formatPrice(produto.preco ? produto.preco * (1 - (lojistaData.descontoRedesSociais / 100)) : 0)}
                               </p>
-                              <p className="text-left text-[8px] font-semibold text-green-600 leading-tight">
+                              <p className="text-left text-[7px] font-semibold text-green-600 leading-tight">
                                 Desconto aplicado
                               </p>
                             </div>
                           </>
                         ) : (
                           <>
-                            <p className="text-left text-xs font-bold text-blue-600">
+                            <p className="text-left text-[10px] font-bold text-blue-600">
                               {formatPrice(produto.preco)}
                             </p>
                           </>
