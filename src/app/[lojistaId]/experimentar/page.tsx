@@ -173,14 +173,20 @@ export default function ExperimentarPage() {
       if (response.ok) {
         const data = await response.json()
         const favoritesList = data.favorites || data.favoritos || []
-        const validFavorites = favoritesList.filter((f: any) => f.imagemUrl)
+        // Filtrar apenas os likes (action === "like" ou tipo === "like")
+        const likesOnly = favoritesList.filter((f: any) => {
+          const hasImage = f.imagemUrl
+          const isLike = f.action === "like" || f.tipo === "like" || f.votedType === "like"
+          // Se não tiver campo de ação, assumir que é like (compatibilidade com dados antigos)
+          return hasImage && (isLike || (!f.action && !f.tipo && !f.votedType))
+        })
         // Ordenar por data de criação (mais recente primeiro)
-        const sortedFavorites = validFavorites.sort((a: any, b: any) => {
+        const sortedFavorites = likesOnly.sort((a: any, b: any) => {
           const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0)
           const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0)
           return dateB.getTime() - dateA.getTime()
         })
-        setFavorites(sortedFavorites.slice(0, 20)) // Últimos 20
+        setFavorites(sortedFavorites.slice(0, 10)) // Últimos 10 likes
       }
     } catch (error) {
       console.error("[ExperimentarPage] Erro ao carregar favoritos:", error)
@@ -312,14 +318,22 @@ export default function ExperimentarPage() {
 
   // Gerar looks
   const handleVisualize = async () => {
-    if (!userPhoto || selectedProducts.length === 0) return
+    if ((!userPhoto && !userPhotoUrl) || selectedProducts.length === 0) return
 
     try {
       setIsGenerating(true)
       setGenerationError(null)
 
-      // 1. Upload da foto
-      const personImageUrl = await uploadPersonPhoto(userPhoto)
+      // 1. Upload da foto (se tiver File, fazer upload; se não, usar URL salva)
+      let personImageUrl: string
+      if (userPhoto) {
+        personImageUrl = await uploadPersonPhoto(userPhoto)
+      } else if (userPhotoUrl) {
+        // Se não tiver File mas tiver URL, usar a URL diretamente
+        personImageUrl = userPhotoUrl
+      } else {
+        throw new Error("Foto não encontrada")
+      }
       console.log("[handleVisualize] ✅ Foto enviada:", personImageUrl?.substring(0, 50) + "...")
 
       // 2. Preparar dados para geração
@@ -828,7 +842,7 @@ export default function ExperimentarPage() {
       </div>
 
       {/* Botão FAB - Visualize */}
-      {userPhoto && selectedProducts.length > 0 && (
+      {(userPhoto || userPhotoUrl) && selectedProducts.length > 0 && (
         <div className="fixed bottom-6 right-6 z-50 p-1 rounded-full shadow-2xl" style={{ background: 'linear-gradient(to right, #facc15, #ec4899, #a855f7, #3b82f6, #10b981)' }}>
           <button
             onClick={handleVisualize}

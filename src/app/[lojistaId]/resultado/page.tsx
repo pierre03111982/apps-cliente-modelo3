@@ -153,14 +153,20 @@ export default function ResultadoPage() {
       if (response.ok) {
         const data = await response.json()
         const favoritesList = data.favorites || data.favoritos || []
-        const validFavorites = favoritesList.filter((f: any) => f.imagemUrl)
+        // Filtrar apenas os likes (action === "like" ou tipo === "like")
+        const likesOnly = favoritesList.filter((f: any) => {
+          const hasImage = f.imagemUrl
+          const isLike = f.action === "like" || f.tipo === "like" || f.votedType === "like"
+          // Se não tiver campo de ação, assumir que é like (compatibilidade com dados antigos)
+          return hasImage && (isLike || (!f.action && !f.tipo && !f.votedType))
+        })
         // Ordenar por data de criação (mais recente primeiro)
-        const sortedFavorites = validFavorites.sort((a: any, b: any) => {
+        const sortedFavorites = likesOnly.sort((a: any, b: any) => {
           const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0)
           const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0)
           return dateB.getTime() - dateA.getTime()
         })
-        setFavorites(sortedFavorites.slice(0, 20))
+        setFavorites(sortedFavorites.slice(0, 10)) // Últimos 10 likes
       }
     } catch (error) {
       console.error("[ResultadoPage] Erro ao carregar favoritos:", error)
