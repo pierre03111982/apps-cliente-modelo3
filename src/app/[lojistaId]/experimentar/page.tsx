@@ -524,7 +524,7 @@ export default function ExperimentarPage() {
               <div className="flex-1 self-stretch rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg p-4 md:p-5 shadow-xl flex flex-col min-h-0 max-w-[42%]">
                 <div className="mb-4 shrink-0">
                   <div className="rounded-lg border-2 border-white/50 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 p-3 shadow-lg">
-                    <h2 className="text-center text-base md:text-lg font-black text-white uppercase tracking-wide" style={{ fontFamily: 'Inter, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
+                    <h2 className="text-center text-xs md:text-sm font-black text-white uppercase tracking-wide" style={{ fontFamily: 'Inter, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
                       Provador virtual com IA
                     </h2>
                   </div>
