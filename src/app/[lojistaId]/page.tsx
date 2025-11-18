@@ -1,33 +1,58 @@
 "use client"
 
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 
 export default function ClienteAppPage() {
   const params = useParams()
   const router = useRouter()
-  const lojistaId = (params?.lojistaId as string) || ""
+  const [lojistaId, setLojistaId] = useState<string>("")
+  const [isRedirecting, setIsRedirecting] = useState(false)
   
-  // Redirecionar para login se não estiver logado
   useEffect(() => {
-    if (!lojistaId) {
-      // Se não houver lojistaId, não fazer nada (deixar a rota raiz funcionar)
+    // Garantir que params está disponível
+    const id = (params?.lojistaId as string) || ""
+    setLojistaId(id)
+    
+    if (!id) {
+      // Se não houver lojistaId, redirecionar para página raiz
+      router.push("/")
       return
     }
     
+    if (isRedirecting) return
+    
+    setIsRedirecting(true)
+    
+    // Verificar login e redirecionar
     const checkLogin = () => {
-      const stored = localStorage.getItem(`cliente_${lojistaId}`)
-      if (!stored) {
-        router.push(`/${lojistaId}/login`)
-        return
+      try {
+        const stored = localStorage.getItem(`cliente_${id}`)
+        if (!stored) {
+          router.push(`/${id}/login`)
+          return
+        }
+        // Se estiver logado, redirecionar para experimentar
+        router.push(`/${id}/experimentar`)
+      } catch (error) {
+        console.error("[ClienteAppPage] Erro ao verificar login:", error)
+        router.push(`/${id}/login`)
       }
-      // Se estiver logado, redirecionar para experimentar
-      router.push(`/${lojistaId}/experimentar`)
     }
     
-    checkLogin()
-  }, [lojistaId, router])
+    // Pequeno delay para garantir que o router está pronto
+    setTimeout(checkLogin, 100)
+  }, [params, router, isRedirecting])
   
-  // Retornar null enquanto redireciona
-  return null
+  // Mostrar loading enquanto redireciona
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">
+      <div className="text-center">
+        <div className="mb-4 text-lg">Carregando...</div>
+        {lojistaId && (
+          <div className="text-sm text-gray-400">Redirecionando para {lojistaId}</div>
+        )}
+      </div>
+    </div>
+  )
 }

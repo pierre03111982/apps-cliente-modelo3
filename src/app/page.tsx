@@ -17,10 +17,14 @@ export default function HomePage() {
           Acesse o aplicativo usando o link completo com o ID da loja:
         </p>
         <p className="text-sm text-gray-500 break-all mb-6">
-          https://apps-cliente-modelo1.vercel.app/[lojistaId]/login
+          {typeof window !== 'undefined' 
+            ? `${window.location.origin}/[lojistaId]/login`
+            : 'https://modelo1.experimenteai.com.br/[lojistaId]/login'}
         </p>
         <div className="mt-6 text-xs text-gray-500">
-          <p>Exemplo: https://apps-cliente-modelo1.vercel.app/seu-lojista-id/login</p>
+          <p>Exemplo: {typeof window !== 'undefined' 
+            ? `${window.location.origin}/seu-lojista-id/login`
+            : 'https://modelo1.experimenteai.com.br/seu-lojista-id/login'}</p>
         </div>
       </div>
     </div>
