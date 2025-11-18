@@ -901,9 +901,10 @@ export default function ExperimentarPage() {
                     onClick={() => {
                       // Salvar dados do favorito no sessionStorage
                       const favoritoLook: GeneratedLook = {
+                        id: favorito.id || `favorito-${Date.now()}`,
                         imagemUrl: favorito.imagemUrl,
                         titulo: favorito.productName || "Look favorito",
-                        produtoNome: favorito.productName || null,
+                        produtoNome: favorito.productName || "",
                         produtoPreco: favorito.productPrice || null,
                         compositionId: favorito.compositionId || null,
                         jobId: favorito.jobId || null,
