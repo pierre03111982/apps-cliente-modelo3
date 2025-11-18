@@ -122,15 +122,35 @@ export default function ExperimentarPage() {
     }
   }, [lojistaId])
 
-  // Verificar se cliente está logado
+  // Verificar se cliente está logado e carregar foto do sessionStorage
   useEffect(() => {
     if (!lojistaId) return
 
     const stored = localStorage.getItem(`cliente_${lojistaId}`)
     if (!stored) {
       router.push(`/${lojistaId}/login`)
+      return
     }
-  }, [lojistaId, router])
+
+    // Carregar foto do sessionStorage quando volta da Tela 3
+    const savedPhotoUrl = sessionStorage.getItem(`photo_${lojistaId}`)
+    if (savedPhotoUrl && !userPhotoUrl) {
+      setUserPhotoUrl(savedPhotoUrl)
+    }
+
+    // Carregar produtos selecionados do sessionStorage
+    const savedProducts = sessionStorage.getItem(`products_${lojistaId}`)
+    if (savedProducts) {
+      try {
+        const products = JSON.parse(savedProducts)
+        if (Array.isArray(products) && products.length > 0) {
+          setSelectedProducts(products)
+        }
+      } catch (err) {
+        console.error("[ExperimentarPage] Erro ao carregar produtos do sessionStorage:", err)
+      }
+    }
+  }, [lojistaId, router, userPhotoUrl])
 
   // Carregar favoritos
   const loadFavorites = async () => {
@@ -210,12 +230,16 @@ export default function ExperimentarPage() {
     }
   }
 
-  // Toggle seleção de produto
+  // Toggle seleção de produto - permite até 2 produtos de categorias diferentes
   const toggleProductSelection = (produto: Produto) => {
     const isAlreadySelected = selectedProducts.some((p) => p.id === produto.id)
 
     if (isAlreadySelected) {
-      setSelectedProducts((prev) => prev.filter((p) => p.id !== produto.id))
+      setSelectedProducts((prev) => {
+        const updated = prev.filter((p) => p.id !== produto.id)
+        sessionStorage.setItem(`products_${lojistaId}`, JSON.stringify(updated))
+        return updated
+      })
       setCategoryWarning(null)
       return
     }
@@ -227,13 +251,24 @@ export default function ExperimentarPage() {
 
     if (existingProductInCategory) {
       setCategoryWarning(
-        `Você já selecionou um produto da categoria "${produto.categoria}". Apenas um produto por categoria é permitido.`
+        `Você já selecionou um produto da categoria "${produto.categoria}". Selecione produtos de categorias diferentes.`
       )
       setTimeout(() => setCategoryWarning(null), 5000)
       return
     }
 
-    setSelectedProducts((prev) => [...prev, produto])
+    // Verificar se já tem 2 produtos selecionados
+    if (selectedProducts.length >= 2) {
+      setCategoryWarning(
+        "Você pode selecionar até 2 produtos de categorias diferentes. Remova um produto antes de selecionar outro."
+      )
+      setTimeout(() => setCategoryWarning(null), 5000)
+      return
+    }
+
+    const updated = [...selectedProducts, produto]
+    setSelectedProducts(updated)
+    sessionStorage.setItem(`products_${lojistaId}`, JSON.stringify(updated))
     setCategoryWarning(null)
   }
 
@@ -374,13 +409,9 @@ export default function ExperimentarPage() {
 
   return (
     <div className="relative min-h-screen w-screen overflow-hidden">
-      {/* 1. Imagem de Fundo com Desfoque e Overlay */}
-      <div className="fixed inset-0 z-0">
-        <img
-          src={CLOSET_BACKGROUND_IMAGE}
-          alt="Guarda-roupa de luxo"
-          className="h-full w-full object-cover blur-[6px] brightness-50"
-        />
+      {/* 1. Imagem de Fundo com Desfoque e Overlay - Fixa */}
+      <div className="fixed inset-0 z-0" style={{ backgroundImage: `url(${CLOSET_BACKGROUND_IMAGE})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundAttachment: 'fixed' }}>
+        <div className="h-full w-full blur-[6px] brightness-50" style={{ backgroundImage: `url(${CLOSET_BACKGROUND_IMAGE})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundAttachment: 'fixed' }}></div>
       </div>
 
       {/* 2. Conteúdo Principal */}
@@ -509,62 +540,74 @@ export default function ExperimentarPage() {
                     </div>
                   </div>
 
-                  {/* Miniatura do Produto Selecionado */}
-                  <div className={`flex flex-col gap-2 border-t border-white/20 pt-3 shrink-0 ${selectedProducts.length > 0 ? '' : 'opacity-0 h-0 overflow-hidden'}`}>
-                    {selectedProducts.length > 0 && selectedProducts[0] && (
-                      <div className="rounded-xl border-2 border-white/30 bg-white overflow-hidden shadow-lg w-[30%] mx-auto">
-                        {/* Imagem do Produto */}
-                        {selectedProducts[0].imagemUrl && (
-                          <div className="relative aspect-square w-full">
-                            <Image
-                              src={selectedProducts[0].imagemUrl}
-                              alt={selectedProducts[0].nome}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        )}
-                        {/* Informações do Produto */}
-                        <div className="p-1.5 bg-white">
-                          <h3 className="text-left text-[10px] font-semibold text-gray-900 line-clamp-2 mb-0.5 leading-tight">
-                            {selectedProducts[0].nome}
-                          </h3>
-                          <div className="flex flex-col gap-0.5">
-                            {descontoAplicado && lojistaData?.descontoRedesSociais ? (
-                              <>
-                                <p className="text-left text-[8px] text-gray-400 line-through">
-                                  {formatPrice(selectedProducts[0].preco)}
-                                </p>
-                                <div className="flex items-center gap-0.5 flex-wrap">
-                                  <p className="text-left text-[10px] font-bold text-yellow-500">
-                                    {formatPrice(selectedProducts[0].preco ? selectedProducts[0].preco * (1 - (lojistaData.descontoRedesSociais / 100)) : 0)}
-                                  </p>
-                                  <p className="text-left text-[7px] font-semibold text-green-600 leading-tight">
-                                    Desconto aplicado
-                                  </p>
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <p className="text-left text-[10px] font-bold text-blue-600">
-                                  {formatPrice(selectedProducts[0].preco)}
-                                </p>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    {selectedProducts.length > 1 && (
-                      <span className="text-xs font-semibold text-yellow-400 text-center">
-                        +{selectedProducts.length - 1} mais produto{selectedProducts.length - 1 > 1 ? 's' : ''}
-                      </span>
-                    )}
-                  </div>
                 </div>
               </div>
             )}
           </div>
+
+          {/* Caixa com Produtos Selecionados - Abaixo da Foto Upload */}
+          {userPhotoUrl && selectedProducts.length > 0 && (
+            <div className="mb-6 rounded-xl border border-white/30 bg-white/10 backdrop-blur-lg p-4 shadow-xl">
+              <h3 className="mb-3 text-center text-sm font-bold text-white">
+                Produtos Selecionados
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                {selectedProducts.map((produto, index) => (
+                  <div key={produto.id || index} className="rounded-lg border-2 border-white/30 bg-white overflow-hidden shadow-lg">
+                    {/* Imagem do Produto */}
+                    {produto.imagemUrl && (
+                      <div className="relative aspect-square w-full">
+                        <Image
+                          src={produto.imagemUrl}
+                          alt={produto.nome}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+                    {/* Informações do Produto */}
+                    <div className="p-2 bg-white">
+                      <h3 className="text-left text-xs font-semibold text-gray-900 line-clamp-2 mb-1 leading-tight">
+                        {produto.nome}
+                      </h3>
+                      <div className="flex flex-col gap-0.5">
+                        {descontoAplicado && lojistaData?.descontoRedesSociais ? (
+                          <>
+                            <p className="text-left text-[10px] text-gray-400 line-through">
+                              {formatPrice(produto.preco)}
+                            </p>
+                            <div className="flex items-center gap-1 flex-wrap">
+                              <p className="text-left text-xs font-bold text-yellow-500">
+                                {formatPrice(produto.preco ? produto.preco * (1 - (lojistaData.descontoRedesSociais / 100)) : 0)}
+                              </p>
+                              <p className="text-left text-[8px] font-semibold text-green-600 leading-tight">
+                                Desconto aplicado
+                              </p>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-left text-xs font-bold text-blue-600">
+                              {formatPrice(produto.preco)}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Aviso sobre seleção de produtos */}
+          {userPhotoUrl && (
+            <div className="mb-4 rounded-lg border border-blue-500/50 bg-blue-500/10 px-4 py-2 backdrop-blur-sm">
+              <p className="text-xs font-medium text-blue-200 text-center">
+                💡 Você pode selecionar até <span className="font-bold text-yellow-300">2 produtos</span> de <span className="font-bold text-yellow-300">categorias diferentes</span>
+              </p>
+            </div>
+          )}
 
           {/* Caixa de Redes Sociais e Desconto */}
           <div className="mb-6 rounded-lg border border-white/20 bg-white/5 backdrop-blur-sm px-4 py-3 shadow-lg">
