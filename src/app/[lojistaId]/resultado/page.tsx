@@ -306,9 +306,7 @@ export default function ResultadoPage() {
       const clienteId = clienteData?.clienteId || null
 
       // Usar a URL da foto já salva (não precisa fazer upload novamente)
-      // Ou buscar do primeiro look gerado anteriormente
-      const currentLook = looks[currentLookIndex]
-      const personImageUrl = currentLook?.personImageUrl || storedPhoto
+      const personImageUrl = storedPhoto
 
       if (!personImageUrl) {
         throw new Error("Foto não encontrada")
