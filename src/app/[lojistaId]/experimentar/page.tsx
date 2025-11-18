@@ -445,17 +445,18 @@ export default function ExperimentarPage() {
           {/* Upload de Foto e Área Personalize o seu Look */}
           <div className={`mb-6 flex items-stretch gap-4 ${userPhotoUrl ? 'justify-start' : 'justify-center'}`}>
             {/* Upload de Foto - Sem caixa externa, apenas moldura dupla */}
-            <div className={`${userPhotoUrl ? 'max-w-[42%]' : 'w-full'}`}>
+            <div className={`${userPhotoUrl ? 'flex-shrink-0' : 'w-full'}`}>
               {userPhotoUrl ? (
-                <div className="relative inline-block">
+                <div className="relative inline-block h-full">
                   {/* Moldura Externa - Contínua */}
-                  <div className="relative rounded-2xl border-2 border-white/50 p-2 shadow-xl inline-block">
+                  <div className="relative rounded-2xl border-2 border-white/50 p-2 shadow-xl inline-block h-full">
                     {/* Moldura Interna - Pontilhada */}
-                    <div className="relative border-2 border-dashed border-white/30 rounded-xl p-1 inline-block">
+                    <div className="relative border-2 border-dashed border-white/30 rounded-xl p-1 inline-block h-full">
                       <img
                         src={userPhotoUrl}
                         alt="Sua foto"
-                        className="h-auto w-auto max-w-full object-contain block rounded-lg"
+                        className="h-full w-auto max-h-full object-contain block rounded-lg"
+                        style={{ maxWidth: '100%' }}
                       />
                     </div>
                   </div>
@@ -487,76 +488,75 @@ export default function ExperimentarPage() {
               )}
             </div>
 
-            {/* Área: Personalize o seu Look - Ao lado da foto */}
+            {/* Área: Personalize o seu Look - Ao lado da foto, mesmo tamanho */}
             {userPhotoUrl && (
-              <div className="flex-1 self-stretch rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg p-4 md:p-5 shadow-xl flex flex-col min-h-0">
-                <div className="mb-4 shrink-0">
-                  <div className="rounded-lg border-2 border-white/50 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 p-3 shadow-lg">
-                    <h2 className="text-center text-base md:text-lg font-black text-white uppercase tracking-wide" style={{ fontFamily: 'Inter, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
+              <div className="flex-shrink-0 self-stretch rounded-xl border border-white/20 bg-white/10 backdrop-blur-lg p-3 md:p-4 shadow-xl flex flex-col min-h-0" style={{ width: '100%', maxWidth: '100%' }}>
+                <div className="mb-3 shrink-0">
+                  <div className="rounded-lg border-2 border-white/50 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 p-2 shadow-lg">
+                    <h2 className="text-center text-xs md:text-sm font-black text-white uppercase tracking-wide" style={{ fontFamily: 'Inter, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
                       Personalize o seu Look
                     </h2>
                   </div>
                 </div>
                 
-                <div className="flex flex-col gap-4 flex-1 justify-between min-h-0">
+                <div className="flex flex-col gap-3 flex-1 justify-between min-h-0">
                   {/* Passo a Passo */}
-                  <div className="flex flex-col gap-3 shrink-0">
+                  <div className="flex flex-col gap-2 shrink-0">
                     {/* Passo 1 */}
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-500/80 text-sm font-bold text-white shadow-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-500/80 text-xs font-bold text-white shadow-lg">
                         1
                       </div>
                       <div className="flex flex-1 flex-col">
-                        <span className="text-xs md:text-sm font-semibold text-white">Carregue sua Foto</span>
+                        <span className="text-[10px] md:text-xs font-semibold text-white">Carregue sua Foto</span>
                         {userPhotoUrl && (
-                          <div className="mt-1 h-1 w-full rounded-full bg-green-500"></div>
+                          <div className="mt-0.5 h-0.5 w-full rounded-full bg-green-500"></div>
                         )}
                       </div>
                     </div>
 
                     {/* Passo 2 */}
-                    <div className="flex items-center gap-3">
-                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-lg ${
+                    <div className="flex items-center gap-2">
+                      <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-lg ${
                         selectedProducts.length > 0 ? 'bg-teal-500/80' : 'bg-white/20'
                       }`}>
                         2
                       </div>
                       <div className="flex flex-1 flex-col">
-                        <span className="text-xs md:text-sm font-semibold text-white">Escolha um Produto</span>
+                        <span className="text-[10px] md:text-xs font-semibold text-white">Escolha um Produto</span>
                         {selectedProducts.length > 0 && (
-                          <div className="mt-1 h-1 w-full rounded-full bg-green-500"></div>
+                          <div className="mt-0.5 h-0.5 w-full rounded-full bg-green-500"></div>
                         )}
                       </div>
                     </div>
 
                     {/* Passo 3 */}
-                    <div className="flex items-center gap-3">
-                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-lg ${
+                    <div className="flex items-center gap-2">
+                      <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-lg ${
                         userPhotoUrl && selectedProducts.length > 0 ? 'bg-teal-500/80' : 'bg-white/20'
                       }`}>
                         3
                       </div>
                       <div className="flex flex-1 flex-col">
-                        <span className="text-xs md:text-sm font-semibold text-white">Crie o seu Look</span>
+                        <span className="text-[10px] md:text-xs font-semibold text-white">Crie o seu Look</span>
                         {userPhotoUrl && selectedProducts.length > 0 && (
-                          <div className="mt-1 h-1 w-full rounded-full bg-green-500"></div>
+                          <div className="mt-0.5 h-0.5 w-full rounded-full bg-green-500"></div>
                         )}
                       </div>
                     </div>
                   </div>
-
                 </div>
               </div>
             )}
           </div>
 
-          {/* Caixa com Produtos Selecionados - Abaixo da Foto Upload */}
+          {/* Caixa com Produtos Selecionados - Abaixo da Foto Upload - Reduzida 40% */}
           {userPhotoUrl && selectedProducts.length > 0 && (
-            <div className="mb-6 rounded-xl border border-white/30 bg-white/10 backdrop-blur-lg p-4 shadow-xl">
-              <h3 className="mb-3 text-center text-sm font-bold text-white">
+            <div className="mb-6 rounded-xl border border-white/30 bg-white/10 backdrop-blur-lg p-2.5 shadow-xl" style={{ width: '60%', maxWidth: '60%' }}>
+              <h3 className="mb-2 text-center text-xs font-bold text-white">
                 Produtos Selecionados
               </h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 {selectedProducts.map((produto, index) => (
                   <div key={produto.id || index} className="rounded-lg border-2 border-white/30 bg-white overflow-hidden shadow-lg">
                     {/* Imagem do Produto */}
@@ -571,28 +571,28 @@ export default function ExperimentarPage() {
                       </div>
                     )}
                     {/* Informações do Produto */}
-                    <div className="p-2 bg-white">
-                      <h3 className="text-left text-xs font-semibold text-gray-900 line-clamp-2 mb-1 leading-tight">
+                    <div className="p-1.5 bg-white">
+                      <h3 className="text-left text-[9px] font-semibold text-gray-900 line-clamp-2 mb-0.5 leading-tight">
                         {produto.nome}
                       </h3>
                       <div className="flex flex-col gap-0.5">
                         {descontoAplicado && lojistaData?.descontoRedesSociais ? (
                           <>
-                            <p className="text-left text-[10px] text-gray-400 line-through">
+                            <p className="text-left text-[8px] text-gray-400 line-through">
                               {formatPrice(produto.preco)}
                             </p>
-                            <div className="flex items-center gap-1 flex-wrap">
-                              <p className="text-left text-xs font-bold text-yellow-500">
+                            <div className="flex items-center gap-0.5 flex-wrap">
+                              <p className="text-left text-[9px] font-bold text-yellow-500">
                                 {formatPrice(produto.preco ? produto.preco * (1 - (lojistaData.descontoRedesSociais / 100)) : 0)}
                               </p>
-                              <p className="text-left text-[8px] font-semibold text-green-600 leading-tight">
+                              <p className="text-left text-[7px] font-semibold text-green-600 leading-tight">
                                 Desconto aplicado
                               </p>
                             </div>
                           </>
                         ) : (
                           <>
-                            <p className="text-left text-xs font-bold text-blue-600">
+                            <p className="text-left text-[9px] font-bold text-blue-600">
                               {formatPrice(produto.preco)}
                             </p>
                           </>
