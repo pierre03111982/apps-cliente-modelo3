@@ -1,15 +1,12 @@
-import type { Metadata } from "next"
+"use client"
 
-export const metadata: Metadata = {
-  title: "Experimente AI - Modelo 1",
-  description: "Aplicativo cliente - Modelo 1",
-}
-
-// Forçar renderização estática
-export const dynamic = 'force-static'
-export const revalidate = false
+import { useEffect } from "react"
 
 export default function HomePage() {
+  useEffect(() => {
+    // Garantir que a página seja renderizada no cliente
+  }, [])
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white px-4">
       <div className="text-center max-w-2xl">

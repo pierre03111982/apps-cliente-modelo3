@@ -10,7 +10,10 @@ export default function ClienteAppPage() {
   
   // Redirecionar para login se não estiver logado
   useEffect(() => {
-    if (!lojistaId) return
+    if (!lojistaId) {
+      // Se não houver lojistaId, não fazer nada (deixar a rota raiz funcionar)
+      return
+    }
     
     const checkLogin = () => {
       const stored = localStorage.getItem(`cliente_${lojistaId}`)
