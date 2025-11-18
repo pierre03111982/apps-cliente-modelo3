@@ -32,6 +32,7 @@ export default function ResultadoPage() {
   const [favorites, setFavorites] = useState<any[]>([])
   const [isLoadingFavorites, setIsLoadingFavorites] = useState(false)
   const [selectedProducts, setSelectedProducts] = useState<any[]>([])
+  const [fromFavoritos, setFromFavoritos] = useState(false)
 
   // Carregar dados da loja
   useEffect(() => {
@@ -85,10 +86,37 @@ export default function ResultadoPage() {
     loadData()
   }, [lojistaId])
 
-  // Carregar looks do sessionStorage
+  // Carregar looks do sessionStorage ou favorito
   useEffect(() => {
     if (!lojistaId) return
 
+    // Verificar se veio de favoritos
+    const fromFavoritosFlag = sessionStorage.getItem(`from_favoritos_${lojistaId}`)
+    if (fromFavoritosFlag === "true") {
+      setFromFavoritos(true)
+      // Carregar favorito do sessionStorage
+      const favoritoData = sessionStorage.getItem(`favorito_${lojistaId}`)
+      if (favoritoData) {
+        try {
+          const favoritoLook = JSON.parse(favoritoData)
+          setLooks([favoritoLook])
+          setCurrentLookIndex(0)
+          // Marcar como já votado (like)
+          setHasVoted(true)
+          setVotedType("like")
+          // Limpar flag
+          sessionStorage.removeItem(`from_favoritos_${lojistaId}`)
+        } catch (error) {
+          console.error("[ResultadoPage] Erro ao carregar favorito:", error)
+          router.push(`/${lojistaId}/experimentar`)
+        }
+      } else {
+        router.push(`/${lojistaId}/experimentar`)
+      }
+      return
+    }
+
+    // Carregar looks normalmente
     const storedLooks = sessionStorage.getItem(`looks_${lojistaId}`)
     if (storedLooks) {
       try {
@@ -126,11 +154,13 @@ export default function ResultadoPage() {
     }
   }, [lojistaId, router])
 
-  // Resetar votação quando mudar de look
+  // Resetar votação quando mudar de look (mas não se vier de favoritos)
   useEffect(() => {
-    setHasVoted(false)
-    setVotedType(null)
-  }, [currentLookIndex])
+    if (!fromFavoritos) {
+      setHasVoted(false)
+      setVotedType(null)
+    }
+  }, [currentLookIndex, fromFavoritos])
 
   // Carregar favoritos
   const loadFavorites = async () => {
@@ -682,7 +712,24 @@ export default function ResultadoPage() {
                 {favorites.map((favorito) => (
                   <div
                     key={favorito.id}
-                    className="group relative overflow-hidden rounded-lg border border-white/20 bg-white/5 transition hover:bg-white/10"
+                    onClick={() => {
+                      // Salvar dados do favorito no sessionStorage
+                      const favoritoLook: GeneratedLook = {
+                        imagemUrl: favorito.imagemUrl,
+                        titulo: favorito.productName || "Look favorito",
+                        produtoNome: favorito.productName || null,
+                        produtoPreco: favorito.productPrice || null,
+                        compositionId: favorito.compositionId || null,
+                        jobId: favorito.jobId || null,
+                      }
+                      sessionStorage.setItem(`favorito_${lojistaId}`, JSON.stringify(favoritoLook))
+                      sessionStorage.setItem(`from_favoritos_${lojistaId}`, "true")
+                      // Fechar modal e recarregar página
+                      setShowFavoritesModal(false)
+                      // Recarregar a página para aplicar as mudanças
+                      window.location.href = `/${lojistaId}/resultado?from=favoritos`
+                    }}
+                    className="group relative overflow-hidden rounded-lg border border-white/20 bg-white/5 transition hover:bg-white/10 cursor-pointer"
                   >
                     {favorito.imagemUrl && (
                       <div className="relative aspect-square w-full">

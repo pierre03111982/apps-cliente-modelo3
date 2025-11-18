@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import Image from "next/image"
 import { Upload, Camera, Wand2, Heart, X, Check, Filter, ThumbsUp, Instagram, Facebook, Music2, Share2 } from "lucide-react"
 import { fetchLojistaData, fetchProdutos } from "@/lib/firebaseQueries"
-import type { Produto, LojistaData, SalesConfig, SocialLinks } from "@/lib/types"
+import type { Produto, LojistaData, SalesConfig, SocialLinks, GeneratedLook } from "@/lib/types"
 import { CLOSET_BACKGROUND_IMAGE } from "@/lib/constants"
 
 // Resolver backend URL
@@ -898,7 +898,22 @@ export default function ExperimentarPage() {
                 {favorites.map((favorito) => (
                   <div
                     key={favorito.id}
-                    className="group relative overflow-hidden rounded-lg border border-white/20 bg-white/5 transition hover:bg-white/10"
+                    onClick={() => {
+                      // Salvar dados do favorito no sessionStorage
+                      const favoritoLook: GeneratedLook = {
+                        imagemUrl: favorito.imagemUrl,
+                        titulo: favorito.productName || "Look favorito",
+                        produtoNome: favorito.productName || null,
+                        produtoPreco: favorito.productPrice || null,
+                        compositionId: favorito.compositionId || null,
+                        jobId: favorito.jobId || null,
+                      }
+                      sessionStorage.setItem(`favorito_${lojistaId}`, JSON.stringify(favoritoLook))
+                      sessionStorage.setItem(`from_favoritos_${lojistaId}`, "true")
+                      // Navegar para Tela 3
+                      router.push(`/${lojistaId}/resultado?from=favoritos`)
+                    }}
+                    className="group relative overflow-hidden rounded-lg border border-white/20 bg-white/5 transition hover:bg-white/10 cursor-pointer"
                   >
                     {favorito.imagemUrl && (
                       <div className="relative aspect-square w-full">
