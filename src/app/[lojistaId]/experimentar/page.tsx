@@ -486,7 +486,10 @@ export default function ExperimentarPage() {
       })
 
       if (!response.ok) {
-        throw new Error(`Erro ao gerar composição: ${response.status}`)
+        const errorData = await response.json().catch(() => ({}))
+        // Usar mensagem amigável do backend se disponível, senão usar mensagem genérica
+        const errorMessage = errorData.error || `Erro ao gerar composição (${response.status})`
+        throw new Error(errorMessage)
       }
 
       const responseData = await response.json()

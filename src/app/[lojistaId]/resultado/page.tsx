@@ -515,9 +515,9 @@ export default function ResultadoPage() {
       const responseData = await response.json()
 
       if (!response.ok) {
+        // Usar apenas a mensagem amigável do backend (já trata erro 429)
         const errorMessage = responseData.error || "Erro ao gerar novo look"
-        const errorDetails = responseData.details ? `\n\nDetalhes: ${responseData.details}` : ""
-        throw new Error(`${errorMessage}${errorDetails}`)
+        throw new Error(errorMessage)
       }
 
       // Salvar novos resultados
