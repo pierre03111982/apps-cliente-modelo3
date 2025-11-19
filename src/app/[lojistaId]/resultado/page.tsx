@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Image from "next/image"
-import { ArrowLeft, ThumbsUp, ThumbsDown, Share2, ShoppingCart, Heart, RefreshCw, Home, Instagram, Facebook, Music2, MessageCircle, X } from "lucide-react"
+import { ArrowLeft, ThumbsUp, ThumbsDown, Share2, ShoppingCart, Heart, RefreshCw, Home, Instagram, Facebook, Music2, MessageCircle, X, Sparkles } from "lucide-react"
 import { CLOSET_BACKGROUND_IMAGE } from "@/lib/constants"
 import { fetchLojistaData } from "@/lib/firebaseQueries"
 import type { LojistaData, GeneratedLook } from "@/lib/types"
@@ -512,11 +512,13 @@ export default function ResultadoPage() {
         body: JSON.stringify(payload),
       })
 
-      if (!response.ok) {
-        throw new Error(`Erro ao gerar novo look: ${response.status}`)
-      }
-
       const responseData = await response.json()
+
+      if (!response.ok) {
+        const errorMessage = responseData.error || "Erro ao gerar novo look"
+        const errorDetails = responseData.details ? `\n\nDetalhes: ${responseData.details}` : ""
+        throw new Error(`${errorMessage}${errorDetails}`)
+      }
 
       // Salvar novos resultados
       if (responseData.looks && Array.isArray(responseData.looks) && responseData.looks.length > 0) {
@@ -551,6 +553,29 @@ export default function ResultadoPage() {
     // Limpar produtos selecionados do sessionStorage
     sessionStorage.removeItem(`products_${lojistaId}`)
     router.push(`/${lojistaId}/experimentar`)
+  }
+
+  // Adicionar Acessório (Refinamento)
+  const handleAddAccessory = () => {
+    const currentLook = looks[currentLookIndex]
+    if (!currentLook || !currentLook.imagemUrl) {
+      alert("Erro: Imagem do look não encontrada")
+      return
+    }
+
+    // Salvar a URL da imagem base para refinamento
+    sessionStorage.setItem(`refine_baseImage_${lojistaId}`, currentLook.imagemUrl)
+    
+    // Salvar compositionId se disponível
+    if (currentLook.compositionId) {
+      sessionStorage.setItem(`refine_compositionId_${lojistaId}`, currentLook.compositionId)
+    }
+
+    // Marcar que estamos em modo de refinamento
+    sessionStorage.setItem(`refine_mode_${lojistaId}`, "true")
+
+    // Redirecionar para a galeria de produtos (experimentar) em modo refinamento
+    router.push(`/${lojistaId}/experimentar?mode=refine`)
   }
 
   const currentLook = looks[currentLookIndex]
@@ -812,6 +837,15 @@ export default function ResultadoPage() {
           {hasVoted && (
             <div className="rounded-2xl border border-white/30 bg-white/10 backdrop-blur-lg p-6 shadow-xl">
               <div className="flex flex-col gap-3">
+                <button
+                  onClick={handleAddAccessory}
+                  className="w-full rounded-lg bg-purple-600 px-4 py-3 font-semibold text-white transition hover:bg-purple-700"
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <Sparkles className="h-5 w-5" />
+                    Adicionar Acessório
+                  </div>
+                </button>
                 <button
                   onClick={handleRegenerate}
                   disabled={loadingAction === "remix"}

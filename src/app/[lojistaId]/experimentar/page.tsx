@@ -34,6 +34,9 @@ export default function ExperimentarPage() {
   const [favorites, setFavorites] = useState<any[]>([])
   const [isLoadingFavorites, setIsLoadingFavorites] = useState(false)
   const [descontoAplicado, setDescontoAplicado] = useState(false)
+  const [isRefineMode, setIsRefineMode] = useState(false)
+  const [refineBaseImageUrl, setRefineBaseImageUrl] = useState<string | null>(null)
+  const [refineCompositionId, setRefineCompositionId] = useState<string | null>(null)
 
   // Carregar dados da loja e produtos
   useEffect(() => {
@@ -132,16 +135,31 @@ export default function ExperimentarPage() {
       return
     }
 
-    // Carregar foto do sessionStorage quando volta da Tela 3
-    const savedPhotoUrl = sessionStorage.getItem(`photo_${lojistaId}`)
-    if (savedPhotoUrl && !userPhotoUrl) {
-      setUserPhotoUrl(savedPhotoUrl)
-    }
+    // Verificar se está em modo de refinamento
+    const refineMode = sessionStorage.getItem(`refine_mode_${lojistaId}`)
+    const baseImageUrl = sessionStorage.getItem(`refine_baseImage_${lojistaId}`)
+    const compositionId = sessionStorage.getItem(`refine_compositionId_${lojistaId}`)
 
-    // Limpar produtos selecionados quando volta da Tela 3
-    // Os produtos precisam ser selecionados novamente
-    sessionStorage.removeItem(`products_${lojistaId}`)
-    setSelectedProducts([])
+    if (refineMode === "true" && baseImageUrl) {
+      setIsRefineMode(true)
+      setRefineBaseImageUrl(baseImageUrl)
+      if (compositionId) {
+        setRefineCompositionId(compositionId)
+      }
+      // Em modo refinamento, mostrar a imagem base ao invés de permitir upload
+      setUserPhotoUrl(baseImageUrl)
+    } else {
+      // Carregar foto do sessionStorage quando volta da Tela 3 (modo normal)
+      const savedPhotoUrl = sessionStorage.getItem(`photo_${lojistaId}`)
+      if (savedPhotoUrl && !userPhotoUrl) {
+        setUserPhotoUrl(savedPhotoUrl)
+      }
+
+      // Limpar produtos selecionados quando volta da Tela 3
+      // Os produtos precisam ser selecionados novamente
+      sessionStorage.removeItem(`products_${lojistaId}`)
+      setSelectedProducts([])
+    }
   }, [lojistaId, router, userPhotoUrl])
 
   // Carregar favoritos
@@ -243,8 +261,30 @@ export default function ExperimentarPage() {
     }
   }
 
+  // Categorias permitidas em modo refinamento (apenas acessórios leves)
+  const REFINEMENT_ALLOWED_CATEGORIES = [
+    "joias", "jóias", "acessórios", "acessorios", "óculos", "oculos", 
+    "relógios", "relogios", "cosméticos", "cosmeticos", "tintura", "perfumes"
+  ]
+
+  // Verificar se uma categoria é permitida em modo refinamento
+  const isCategoryAllowedForRefinement = (categoria: string | null | undefined): boolean => {
+    if (!categoria) return false
+    const categoriaLower = categoria.toLowerCase()
+    return REFINEMENT_ALLOWED_CATEGORIES.some(allowed => categoriaLower.includes(allowed))
+  }
+
   // Toggle seleção de produto - permite até 2 produtos de categorias diferentes
   const toggleProductSelection = (produto: Produto) => {
+    // Em modo refinamento, só permitir categorias leves
+    if (isRefineMode && !isCategoryAllowedForRefinement(produto.categoria)) {
+      setCategoryWarning(
+        "Em modo de refinamento, você só pode adicionar acessórios leves (Jóias, Óculos, Cosméticos, Tintura, etc.). Roupas e Calçados não são permitidos."
+      )
+      setTimeout(() => setCategoryWarning(null), 5000)
+      return
+    }
+
     const isAlreadySelected = selectedProducts.some((p) => p.id === produto.id)
 
     if (isAlreadySelected) {
@@ -308,8 +348,98 @@ export default function ExperimentarPage() {
     return data.imageUrl
   }
 
+  // Refinar look (adicionar acessórios)
+  const handleRefine = async () => {
+    if (!refineBaseImageUrl || selectedProducts.length === 0) {
+      alert("Selecione pelo menos um acessório para adicionar ao look")
+      return
+    }
+
+    if (selectedProducts.length > 2) {
+      alert("Você pode selecionar no máximo 2 acessórios")
+      return
+    }
+
+    try {
+      setIsGenerating(true)
+      setGenerationError(null)
+
+      // Buscar clienteId do localStorage
+      const stored = localStorage.getItem(`cliente_${lojistaId}`)
+      const clienteData = stored ? JSON.parse(stored) : null
+      const clienteId = clienteData?.clienteId || null
+
+      // Preparar URLs dos produtos novos
+      const newProductUrls = selectedProducts
+        .map((p) => p.imagemUrl || p.productUrl)
+        .filter(Boolean) as string[]
+
+      if (newProductUrls.length === 0) {
+        throw new Error("Nenhuma imagem de produto válida encontrada")
+      }
+
+      // Chamar API de refinamento
+      const response = await fetch("/api/refine-tryon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          baseImageUrl: refineBaseImageUrl,
+          newProductUrls,
+          lojistaId,
+          customerId: clienteId,
+          compositionId: refineCompositionId,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `Erro ao refinar look: ${response.status}`)
+      }
+
+      const responseData = await response.json()
+
+      if (responseData.refinedImageUrl) {
+        // Criar um novo look com a imagem refinada
+        const refinedLook: GeneratedLook = {
+          id: `refined-${Date.now()}`,
+          titulo: "Look Refinado",
+          imagemUrl: responseData.refinedImageUrl,
+          produtoNome: selectedProducts.map(p => p.nome).join(" + "),
+          produtoPreco: selectedProducts.reduce((sum, p) => sum + (p.preco || 0), 0),
+          compositionId: refineCompositionId || null,
+        }
+
+        // Salvar o look refinado
+        sessionStorage.setItem(`looks_${lojistaId}`, JSON.stringify([refinedLook]))
+        sessionStorage.setItem(`photo_${lojistaId}`, refineBaseImageUrl)
+        sessionStorage.setItem(`products_${lojistaId}`, JSON.stringify(selectedProducts))
+
+        // Limpar modo de refinamento
+        sessionStorage.removeItem(`refine_mode_${lojistaId}`)
+        sessionStorage.removeItem(`refine_baseImage_${lojistaId}`)
+        sessionStorage.removeItem(`refine_compositionId_${lojistaId}`)
+
+        // Navegar para resultado
+        router.push(`/${lojistaId}/resultado`)
+      } else {
+        throw new Error("Imagem refinada não foi retornada")
+      }
+    } catch (error: any) {
+      console.error("[handleRefine] Erro:", error)
+      setGenerationError(error.message || "Erro ao refinar look. Tente novamente.")
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
   // Gerar looks
   const handleVisualize = async () => {
+    // Se estiver em modo refinamento, usar handleRefine
+    if (isRefineMode) {
+      await handleRefine()
+      return
+    }
+
     if ((!userPhoto && !userPhotoUrl) || selectedProducts.length === 0) return
 
     try {
@@ -491,7 +621,7 @@ export default function ExperimentarPage() {
           <div className={`mb-6 flex items-stretch gap-4 ${userPhotoUrl ? 'justify-center' : 'justify-center'}`}>
             {/* Upload de Foto - Sem caixa externa, apenas moldura dupla */}
             <div className={`${userPhotoUrl ? 'max-w-[42%]' : 'w-full'}`}>
-              {userPhotoUrl ? (
+              {userPhotoUrl && !isRefineMode ? (
                 <div className="relative inline-block">
                   {/* Moldura Externa - Contínua */}
                   <div className="relative rounded-2xl border-2 border-white/50 p-2 shadow-xl inline-block">
@@ -527,6 +657,24 @@ export default function ExperimentarPage() {
                     onChange={handlePhotoUpload}
                     className="hidden"
                   />
+                </div>
+              ) : isRefineMode ? (
+                // Em modo refinamento, mostrar a imagem base sem permitir upload
+                <div className="relative inline-block">
+                  <div className="relative rounded-2xl border-2 border-white/50 p-2 shadow-xl inline-block">
+                    <div className="relative border-2 border-dashed border-white/30 rounded-xl p-1 inline-block">
+                      {refineBaseImageUrl && (
+                        <img
+                          src={refineBaseImageUrl}
+                          alt="Look base para refinamento"
+                          className="h-auto w-auto max-w-full object-contain block rounded-lg"
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div className="absolute top-2 left-2 bg-purple-600/90 text-white px-3 py-1 rounded-lg text-xs font-semibold">
+                    Modo Refinamento
+                  </div>
                 </div>
               ) : (
                 <label
@@ -685,9 +833,15 @@ export default function ExperimentarPage() {
           {/* Aviso sobre seleção de produtos */}
           {userPhotoUrl && (
             <div className="mb-4 rounded-lg border border-blue-500/50 bg-blue-500/10 px-4 py-2 backdrop-blur-sm">
-              <p className="text-xs font-medium text-blue-200 text-center">
-                💡 Você pode selecionar até <span className="font-bold text-yellow-300">2 produtos</span> de <span className="font-bold text-yellow-300">categorias diferentes</span>
-              </p>
+              {isRefineMode ? (
+                <p className="text-xs font-medium text-purple-200 text-center">
+                  ✨ <span className="font-bold">Modo Refinamento:</span> Adicione até <span className="font-bold text-yellow-300">2 acessórios leves</span> (Jóias, Óculos, Cosméticos, Tintura). Roupas e Calçados não são permitidos.
+                </p>
+              ) : (
+                <p className="text-xs font-medium text-blue-200 text-center">
+                  💡 Você pode selecionar até <span className="font-bold text-yellow-300">2 produtos</span> de <span className="font-bold text-yellow-300">categorias diferentes</span>
+                </p>
+              )}
             </div>
           )}
 
