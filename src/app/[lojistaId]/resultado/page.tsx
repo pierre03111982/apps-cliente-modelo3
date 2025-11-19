@@ -757,117 +757,121 @@ export default function ResultadoPage() {
 
         {/* Botões Comprar Agora e Adicionar ao Carrinho - Só aparecem após votação */}
         {hasVoted && (
-          <div className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-2 sm:space-y-3">
-            <button
-              onClick={handleCheckout}
-              className="w-full max-w-2xl mx-auto rounded-lg border-2 border-blue-600 bg-blue-600 px-4 sm:px-6 py-3 sm:py-4 text-base sm:text-lg font-bold text-white transition hover:bg-blue-700"
-            >
-              Comprar agora
-            </button>
-            <button
-              onClick={handleCheckout}
-              className="w-full max-w-2xl mx-auto rounded-lg bg-gray-200 px-4 sm:px-6 py-3 sm:py-4 text-base sm:text-lg font-semibold text-blue-600 transition hover:bg-gray-300"
-            >
-              <div className="flex items-center justify-center gap-2">
-                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
-                <span className="text-sm sm:text-base">Adicionar ao carrinho</span>
-              </div>
-            </button>
+          <div className="flex items-center justify-center px-3 sm:px-4 pb-3 sm:pb-4">
+            <div className="w-full max-w-2xl space-y-2 sm:space-y-3">
+              <button
+                onClick={handleCheckout}
+                className="w-full rounded-lg border-2 border-blue-600 bg-blue-600 px-4 sm:px-6 py-3 sm:py-4 text-base sm:text-lg font-bold text-white transition hover:bg-blue-700"
+              >
+                Comprar agora
+              </button>
+              <button
+                onClick={handleCheckout}
+                className="w-full rounded-lg bg-gray-200 px-4 sm:px-6 py-3 sm:py-4 text-base sm:text-lg font-semibold text-blue-600 transition hover:bg-gray-300"
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="text-sm sm:text-base">Adicionar ao carrinho</span>
+                </div>
+              </button>
+            </div>
           </div>
         )}
 
         {/* Painel Inferior - Separado */}
-        <div className="px-3 sm:px-4 pb-4 sm:pb-6 space-y-3 sm:space-y-4">
-          {/* Caixa 1: Feedback Like/Dislike */}
-          {!hasVoted && (
-            <div className="rounded-xl sm:rounded-2xl border border-white/30 bg-white/10 backdrop-blur-lg p-4 sm:p-6 shadow-xl text-center">
-              <p className="mb-3 sm:mb-4 text-base sm:text-lg font-semibold text-white drop-shadow-lg">
-                Curtiu o Look?
-              </p>
-              <div className="flex justify-center gap-3 sm:gap-4">
-                <button
-                  onClick={handleDislike}
-                  disabled={loadingAction === "dislike"}
-                  className="flex items-center gap-1.5 sm:gap-2 rounded-full bg-red-500/80 px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-white transition hover:bg-red-600 disabled:opacity-50"
-                >
-                  <ThumbsDown className="h-4 w-4 sm:h-5 sm:w-5" />
-                  Não
-                </button>
-                <button
-                  onClick={handleLike}
-                  disabled={loadingAction === "like"}
-                  className="flex items-center gap-1.5 sm:gap-2 rounded-full bg-green-500/80 px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-white transition hover:bg-green-600 disabled:opacity-50"
-                >
-                  <ThumbsUp className="h-4 w-4 sm:h-5 sm:w-5" />
-                  Sim
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Botões de Ação após votação */}
-          {hasVoted && (
-            <div className="rounded-xl sm:rounded-2xl border border-white/30 bg-white/10 backdrop-blur-lg p-4 sm:p-6 shadow-xl">
-              <div className="flex flex-col gap-2 sm:gap-3">
-                <div className="flex gap-2 sm:gap-3">
+        <div className="flex items-center justify-center px-3 sm:px-4 pb-4 sm:pb-6">
+          <div className="w-full max-w-2xl space-y-3 sm:space-y-4">
+            {/* Caixa 1: Feedback Like/Dislike */}
+            {!hasVoted && (
+              <div className="rounded-xl sm:rounded-2xl border border-white/30 bg-white/10 backdrop-blur-lg p-4 sm:p-6 shadow-xl text-center">
+                <p className="mb-3 sm:mb-4 text-base sm:text-lg font-semibold text-white drop-shadow-lg">
+                  Curtiu o Look?
+                </p>
+                <div className="flex justify-center gap-3 sm:gap-4">
                   <button
-                    onClick={handleShare}
-                    className="flex-1 rounded-lg bg-blue-600 px-3 sm:px-4 py-2.5 sm:py-3 font-semibold text-white transition hover:bg-blue-700"
+                    onClick={handleDislike}
+                    disabled={loadingAction === "dislike"}
+                    className="flex items-center gap-1.5 sm:gap-2 rounded-full bg-red-500/80 px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-white transition hover:bg-red-600 disabled:opacity-50"
                   >
-                    <Share2 className="mx-auto h-4 w-4 sm:h-5 sm:w-5" />
+                    <ThumbsDown className="h-4 w-4 sm:h-5 sm:w-5" />
+                    Não
                   </button>
                   <button
-                    onClick={() => {
-                      setShowFavoritesModal(true)
-                      // loadFavorites será chamado automaticamente pelo useEffect quando o modal abrir
-                    }}
-                    className="flex-1 rounded-lg bg-pink-500 px-3 sm:px-4 py-2.5 sm:py-3 font-semibold text-white transition hover:bg-pink-600"
+                    onClick={handleLike}
+                    disabled={loadingAction === "like"}
+                    className="flex items-center gap-1.5 sm:gap-2 rounded-full bg-green-500/80 px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base text-white transition hover:bg-green-600 disabled:opacity-50"
+                  >
+                    <ThumbsUp className="h-4 w-4 sm:h-5 sm:w-5" />
+                    Sim
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Botões de Ação após votação */}
+            {hasVoted && (
+              <div className="rounded-xl sm:rounded-2xl border border-white/30 bg-white/10 backdrop-blur-lg p-4 sm:p-6 shadow-xl">
+                <div className="flex flex-col gap-2 sm:gap-3">
+                  <div className="flex gap-2 sm:gap-3">
+                    <button
+                      onClick={handleShare}
+                      className="flex-1 rounded-lg bg-blue-600 px-3 sm:px-4 py-2.5 sm:py-3 font-semibold text-white transition hover:bg-blue-700"
+                    >
+                      <Share2 className="mx-auto h-4 w-4 sm:h-5 sm:w-5" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowFavoritesModal(true)
+                        // loadFavorites será chamado automaticamente pelo useEffect quando o modal abrir
+                      }}
+                      className="flex-1 rounded-lg bg-pink-500 px-3 sm:px-4 py-2.5 sm:py-3 font-semibold text-white transition hover:bg-pink-600"
+                    >
+                      <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+                        <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="text-sm sm:text-base">Favoritos</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Botões de Navegação */}
+            {hasVoted && (
+              <div className="rounded-xl sm:rounded-2xl border border-white/30 bg-white/10 backdrop-blur-lg p-4 sm:p-6 shadow-xl">
+                <div className="flex flex-col gap-2 sm:gap-3">
+                  <button
+                    onClick={handleAddAccessory}
+                    className="w-full rounded-lg bg-purple-600 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-semibold text-white transition hover:bg-purple-700"
                   >
                     <div className="flex items-center justify-center gap-1.5 sm:gap-2">
-                      <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
-                      <span className="text-sm sm:text-base">Favoritos</span>
+                      <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="text-xs sm:text-base">Adicionar Acessório</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={handleRegenerate}
+                    disabled={loadingAction === "remix"}
+                    className="w-full rounded-lg bg-teal-600 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-semibold text-white transition hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+                      <RefreshCw className={`h-4 w-4 sm:h-5 sm:w-5 ${loadingAction === "remix" ? "animate-spin" : ""}`} />
+                      <span className="text-xs sm:text-base">{loadingAction === "remix" ? "Gerando novo look..." : "Remixar esse Look"}</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={handleGoHome}
+                    className="w-full rounded-lg bg-gray-600 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-semibold text-white transition hover:bg-gray-700"
+                  >
+                    <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+                      <Home className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="text-xs sm:text-base">Criar outro Look</span>
                     </div>
                   </button>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Botões de Navegação */}
-          {hasVoted && (
-            <div className="rounded-xl sm:rounded-2xl border border-white/30 bg-white/10 backdrop-blur-lg p-4 sm:p-6 shadow-xl">
-              <div className="flex flex-col gap-2 sm:gap-3">
-                <button
-                  onClick={handleAddAccessory}
-                  className="w-full rounded-lg bg-purple-600 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-semibold text-white transition hover:bg-purple-700"
-                >
-                  <div className="flex items-center justify-center gap-1.5 sm:gap-2">
-                    <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="text-xs sm:text-base">Adicionar Acessório</span>
-                  </div>
-                </button>
-                <button
-                  onClick={handleRegenerate}
-                  disabled={loadingAction === "remix"}
-                  className="w-full rounded-lg bg-teal-600 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-semibold text-white transition hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <div className="flex items-center justify-center gap-1.5 sm:gap-2">
-                    <RefreshCw className={`h-4 w-4 sm:h-5 sm:w-5 ${loadingAction === "remix" ? "animate-spin" : ""}`} />
-                    <span className="text-xs sm:text-base">{loadingAction === "remix" ? "Gerando novo look..." : "Remixar esse Look"}</span>
-                  </div>
-                </button>
-                <button
-                  onClick={handleGoHome}
-                  className="w-full rounded-lg bg-gray-600 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base font-semibold text-white transition hover:bg-gray-700"
-                >
-                  <div className="flex items-center justify-center gap-1.5 sm:gap-2">
-                    <Home className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="text-xs sm:text-base">Criar outro Look</span>
-                  </div>
-                </button>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
