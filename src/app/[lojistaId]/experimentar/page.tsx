@@ -371,7 +371,7 @@ export default function ExperimentarPage() {
 
       // Preparar URLs dos produtos novos
       const newProductUrls = selectedProducts
-        .map((p) => p.imagemUrl || p.productUrl)
+        .map((p) => p.imagemUrl)
         .filter(Boolean) as string[]
 
       if (newProductUrls.length === 0) {
