@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
+import Image from "next/image"
 import { FaApple, FaFacebook, FaGoogle } from "react-icons/fa"
 import { LogIn, UserPlus } from "lucide-react"
 import { fetchLojistaData } from "@/lib/firebaseQueries"
 import type { LojistaData } from "@/lib/types"
-import { CLOSET_BACKGROUND_IMAGE } from "@/lib/constants"
+// CLOSET_BACKGROUND_IMAGE não será mais usado diretamente aqui
 
 export default function LoginPage() {
   const params = useParams()
@@ -14,7 +15,7 @@ export default function LoginPage() {
   const lojistaId = params?.lojistaId as string
 
   const [lojistaData, setLojistaData] = useState<LojistaData | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false) // Manter para futuras implementações, se necessário
   const [mode, setMode] = useState<"login" | "register">("login")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -64,7 +65,7 @@ export default function LoginPage() {
     return whatsappValid && passwordValid
   }
 
-  // Carregar dados da loja (em background, sem bloquear a UI)
+  // Carregar dados da loja (em background)
   useEffect(() => {
     if (!lojistaId) return
 
@@ -76,8 +77,6 @@ export default function LoginPage() {
         console.error("[LoginPage] Erro ao carregar dados da loja:", err)
       }
     }
-
-    // Carregar em background sem mostrar loading
     loadLojistaData()
   }, [lojistaId])
 
@@ -90,13 +89,11 @@ export default function LoginPage() {
         const stored = localStorage.getItem(`cliente_${lojistaId}`)
         if (stored) {
           const clienteData = JSON.parse(stored)
-          // Verificar se ainda é válido (menos de 30 dias)
           const loggedAt = new Date(clienteData.loggedAt)
           const now = new Date()
           const daysDiff = (now.getTime() - loggedAt.getTime()) / (1000 * 60 * 60 * 24)
 
           if (daysDiff < 30) {
-            // Cliente já logado, redirecionar para workspace
             router.push(`/${lojistaId}/experimentar`)
             return
           }
@@ -105,7 +102,6 @@ export default function LoginPage() {
         console.error("[LoginPage] Erro ao verificar cliente existente:", err)
       }
     }
-
     checkExistingClient()
   }, [lojistaId, router])
 
@@ -208,90 +204,86 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden">
-      {/* 1. Imagem de Fundo Minimalista Elegante */}
-      <div className="absolute inset-0 z-0">
+    <div className="relative min-h-screen w-screen overflow-hidden bg-zinc-950 text-white">
+      {/* Background Image Fixa */}
+      <div className="fixed inset-0 z-0 overflow-hidden">
         <img
-          src={CLOSET_BACKGROUND_IMAGE}
-          alt="Fundo minimalista elegante"
-          className="h-full w-full object-cover"
-          style={{ 
-            filter: 'brightness(0.3) contrast(1.1)',
-            opacity: 0.5
-          }}
+          src="/background.jpg"
+          alt="Background"
+          className="absolute inset-0 h-full w-full object-cover blur-[2px] brightness-50 opacity-40"
         />
-        {/* Overlay sutil para melhorar contraste */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900/40 via-transparent to-gray-900/40"></div>
       </div>
 
-      {/* 2. Conteúdo do Formulário Sobreposto */}
-      <div className="relative z-10 flex h-full flex-col items-center justify-center px-3 sm:px-4 py-4 sm:py-6 text-white overflow-y-auto">
-        {/* Card com moldura neomorfista - proporções responsivas */}
-        <div className="w-full max-w-[95%] sm:max-w-md md:max-w-lg lg:max-w-xl neo-card p-4 sm:p-6 md:p-8 text-center rounded-3xl">
-          {/* 3. Títulos */}
-          <h1
-            className="mb-3 sm:mb-4 font-serif text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-accent-emerald to-accent-blue bg-clip-text text-transparent"
-            style={{ fontFamily: "Playfair Display, serif" }}
-            translate="no"
+      {/* Conteúdo do Formulário */}
+      <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 py-8 overflow-y-auto">
+        
+        {/* Caixa com Logo e Nome da Loja */}
+        <div className="w-full max-w-sm mb-6">
+          <div
+            className="rounded-xl border-2 border-zinc-700 bg-zinc-800/70 backdrop-blur-md px-3 py-2 shadow-lg flex items-center justify-center gap-2"
           >
-            EXPERIMENTE AI
-          </h1>
-          <h2
-            className="mb-6 sm:mb-8 text-base sm:text-lg md:text-xl text-white/90"
-            style={{ fontFamily: "Inter, sans-serif" }}
-          >
-            Desbloqueie Seu Estilo Perfeito
-          </h2>
+            {lojistaData?.logoUrl && (
+              <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-zinc-600 flex-shrink-0">
+                <Image
+                  src={lojistaData.logoUrl}
+                  alt={lojistaData.nome || "Logo"}
+                  width={40}
+                  height={40}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+            )}
+            <h3
+              className="text-base font-bold text-white"
+              translate="no"
+            >
+              {lojistaData?.nome || "Sua Loja"}
+            </h3>
+          </div>
+        </div>
 
-          {/* Tabs para alternar entre Login e Cadastro */}
-          <div className="flex gap-2 mb-4 sm:mb-6">
-            <button
-              type="button"
-              onClick={() => {
-                setMode("login")
-                setError(null)
-                setPassword("")
-                setConfirmPassword("")
-                setNome("")
-              }}
-              className={`flex-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-sm sm:text-base font-semibold transition-all ${
-                mode === "login"
-                  ? "gradient-button"
-                  : "neo-button"
-              }`}
-            >
-              <LogIn className="inline-block mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
-              Entrar
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMode("register")
-                setError(null)
-                setPassword("")
-                setConfirmPassword("")
-              }}
-              className={`flex-1 px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-sm sm:text-base font-semibold transition-all ${
-                mode === "register"
-                  ? "gradient-button"
-                  : "neo-button"
-              }`}
-            >
-              <UserPlus className="inline-block mr-1.5 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
-              <span className="hidden sm:inline">Cadastrar conta</span>
-              <span className="sm:hidden">Cadastrar</span>
-            </button>
+        {/* Card Principal do Formulário */}
+        <div
+          className="w-full max-w-sm space-y-6 rounded-2xl border-2 border-zinc-700 bg-zinc-800/70 backdrop-blur-md p-6 shadow-2xl text-center"
+        >
+          {/* Título Principal e Subtítulo */}
+          <div className="text-center">
+            <h1 className="text-xl font-bold text-white mb-1">
+              Bem-vindo(a) à nova era <br /> da Moda Digital
+            </h1>
+            <p className="text-sm text-zinc-400">
+              (Provador Virtual IA)
+            </p>
           </div>
 
-          {/* 4. Formulário */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-6">
+          {/* Botão de Ação Único (Login/Cadastro) */}
+          {mode === 'login' ? (
+            <button
+              onClick={() => setMode("register")}
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-purple-600 text-white py-2.5 font-semibold text-sm transition-all hover:bg-purple-700"
+            >
+              <UserPlus className="h-4 w-4" />
+              Cadastrar conta
+            </button>
+          ) : (
+             <button
+              onClick={() => setMode("login")}
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-purple-600 text-white py-2.5 font-semibold text-sm transition-all hover:bg-purple-700"
+            >
+              <LogIn className="h-4 w-4" />
+              Já tenho uma conta? Entrar
+            </button>
+          )}
+
+          {/* Formulário */}
+          <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "register" && (
               <input
                 type="text"
                 placeholder="Nome completo"
                 value={nome}
                 onChange={(e) => handleNomeChange(e.target.value)}
-                className="neo-input px-4 py-3 text-base sm:text-lg"
+                className="w-full rounded-lg border-2 border-zinc-600 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all text-sm"
                 required
               />
             )}
@@ -301,7 +293,7 @@ export default function LoginPage() {
               placeholder="WhatsApp com DDD"
               value={whatsapp}
               onChange={(e) => handleWhatsAppChange(e.target.value)}
-              className="neo-input px-4 py-3 text-base sm:text-lg"
+              className="w-full rounded-lg border-2 border-zinc-600 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all text-sm"
               required
             />
 
@@ -310,7 +302,7 @@ export default function LoginPage() {
               placeholder="Senha"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="neo-input px-4 py-3 text-base sm:text-lg"
+              className="w-full rounded-lg border-2 border-zinc-600 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all text-sm"
               required
             />
 
@@ -320,51 +312,43 @@ export default function LoginPage() {
                 placeholder="Confirmar senha"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="neo-input px-4 py-3 text-base sm:text-lg"
+                className="w-full rounded-lg border-2 border-zinc-600 bg-zinc-900 px-4 py-2.5 text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all text-sm"
                 required
               />
             )}
 
             {error && (
-              <p className="text-xs sm:text-sm text-red-400 text-left">{error}</p>
+              <p className="text-sm text-red-400">{error}</p>
             )}
 
             <button
               type="submit"
               disabled={isSubmitting || !isFormValid()}
-              className="mt-2 sm:mt-4 gradient-button py-2.5 sm:py-3 text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-purple-600 text-white py-3 font-bold text-sm transition hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? (
-                <>
-                  <span className="mr-2">Processando...</span>
-                </>
-              ) : mode === "login" ? (
-                <>
-                  <LogIn className="h-5 w-5" />
-                  Entrar
-                </>
-              ) : (
-                <>
-                  <UserPlus className="h-5 w-5" />
-                  Cadastrar conta
-                </>
-              )}
+              <LogIn className="h-4 w-4" />
+              {mode === "login" ? "Entrar" : "Cadastrar"}
             </button>
           </form>
 
-          {/* 5. Login Social e Rodapé */}
-          {mode === "login" && (
-            <div className="mt-6 sm:mt-8">
-              <p className="text-xs sm:text-sm text-white/80 mb-3 sm:mb-4">Continuar com...</p>
-              <div className="flex justify-center gap-4 sm:gap-6">
-                <FaGoogle className="h-5 w-5 sm:h-6 sm:w-6 cursor-pointer transition text-text-secondary hover:text-accent-emerald hover:scale-110" />
-                <FaApple className="h-5 w-5 sm:h-6 sm:w-6 cursor-pointer transition text-text-secondary hover:text-accent-emerald hover:scale-110" />
-                <FaFacebook className="h-5 w-5 sm:h-6 sm:w-6 cursor-pointer transition text-text-secondary hover:text-accent-emerald hover:scale-110" />
-              </div>
+          {/* Divisor e Login Social */}
+          <div className="space-y-4">
+            <p className="text-sm text-zinc-400">Continuar com...</p>
+            <div className="flex justify-center gap-4">
+              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-700 text-white transition hover:bg-zinc-600">
+                <FaGoogle />
+              </button>
+              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-700 text-white transition hover:bg-zinc-600">
+                <FaApple />
+              </button>
+              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-700 text-white transition hover:bg-zinc-600">
+                <FaFacebook />
+              </button>
             </div>
-          )}
-
-          <p className="mt-6 sm:mt-8 text-xs sm:text-sm text-white/80">
+          </div>
+          
+          {/* Link de Rodapé */}
+          <p className="text-sm text-zinc-400">
             {mode === "login" ? (
               <>
                 Não tem uma conta?{" "}
@@ -376,7 +360,7 @@ export default function LoginPage() {
                     setPassword("")
                     setConfirmPassword("")
                   }}
-                  className="font-bold text-accent-emerald hover:text-accent-blue transition"
+                  className="font-bold underline text-white hover:text-zinc-200 transition"
                 >
                   Cadastre-se
                 </button>
@@ -393,7 +377,7 @@ export default function LoginPage() {
                     setConfirmPassword("")
                     setNome("")
                   }}
-                  className="font-bold text-accent-emerald hover:text-accent-blue transition"
+                  className="font-bold underline text-white hover:text-zinc-200 transition"
                 >
                   Entrar
                 </button>
@@ -405,4 +389,5 @@ export default function LoginPage() {
     </div>
   )
 }
+
 

@@ -3,16 +3,14 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark; /* Forçando dark mode */
+  color-scheme: light;
 }
 
 body {
-  @apply bg-dark-bg text-text-primary antialiased;
-  background: #0a0a0f;
+  @apply bg-surface text-slate-900 antialiased;
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  min-height: 100vh;
 }
 
 @layer base {
@@ -22,36 +20,17 @@ body {
   h4,
   h5,
   h6 {
-    @apply text-text-primary;
+    @apply text-slate-900;
   }
 
   ::selection {
-    @apply bg-accent-emerald/30 text-white; /* Seleção com verde esmeralda */
+    @apply bg-accent-1/20 text-slate-900;
   }
 }
 
 @layer components {
-  /* Estilo Minimalista Elegante para Cards */
-  .neo-card {
-    @apply rounded-2xl border border-card-border shadow-elegant;
-    background-color: rgba(21, 21, 32, 0.6); /* 60% de transparência */
-  }
-
-  /* Estilo Minimalista Elegante para Inputs */
-  .neo-input {
-    @apply rounded-2xl border border-input-border text-text-primary placeholder-text-secondary/60 shadow-elegant focus:outline-none focus:ring-2 focus:ring-accent-emerald focus:border-accent-emerald transition-all;
-    background-color: rgba(26, 26, 37, 0.6); /* 60% de transparência */
-  }
-
-  /* Estilo Minimalista Elegante para Botões Secundários */
-  .neo-button {
-    @apply rounded-2xl border border-card-border text-text-primary font-semibold shadow-elegant transition-all hover:shadow-elegant-lg hover:border-accent-blue hover:text-accent-blue;
-    background-color: rgba(21, 21, 32, 0.6); /* 60% de transparência */
-  }
-
-  /* Botão Principal com Cor Sólida Elegante */
-  .gradient-button {
-    @apply rounded-2xl bg-accent-emerald text-white font-bold shadow-elegant-lg transition-all hover:scale-105 hover:shadow-glow-emerald hover:bg-accent-blue;
+  .shadow-soft {
+    box-shadow: 0 24px 60px -30px rgba(110, 121, 198, 0.45);
   }
 
   .custom-scrollbar::-webkit-scrollbar {
@@ -59,16 +38,18 @@ body {
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #10b981;
+    background: rgba(255, 255, 255, 0.3);
     border-radius: 4px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #059669;
+    background: rgba(255, 255, 255, 0.5);
   }
 }
+
+

@@ -1,25 +1,23 @@
-# Imagens do Modelo 3
+# Pasta de Imagens
 
-## Imagem de Fundo Minimalista Elegante
+Coloque aqui a imagem de fundo do closet de luxo.
 
-**Arquivo:** `minimalist-background.jpg` (ou `.png`, `.webp`)
+## Instruções:
 
-**Localização:** Coloque sua imagem neste diretório (`public/images/`)
+1. **Nome do arquivo:** `closet-background.jpg` (ou `.png` se for PNG)
 
-**Especificações recomendadas:**
-- **Formato:** JPG, PNG ou WebP
-- **Tamanho:** 1920x1080px ou maior (para melhor qualidade)
-- **Peso:** Máximo 500KB (otimizado para web)
-- **Estilo:** Imagem minimalista elegante que combine com o estilo dark mode e cores suaves (verde esmeralda, azul royal)
+2. **Formato recomendado:**
+   - JPG ou PNG
+   - Resolução: 1920x1080 ou maior
+   - Tamanho: até 5MB
 
-**Como adicionar:**
-1. Renomeie sua imagem para `minimalist-background.jpg` (ou mantenha a extensão original)
-2. Coloque o arquivo neste diretório: `public/images/`
-3. Se usar outro nome, atualize a constante em `src/lib/constants.ts`
+3. **Após colocar a imagem:**
+   - Abra o arquivo `src/lib/constants.ts`
+   - Altere a linha para usar a imagem local:
+   ```typescript
+   export const CLOSET_BACKGROUND_IMAGE = "/images/closet-background.jpg"
+   ```
 
-**Exemplo de nome de arquivo:**
-- `minimalist-background.jpg` ✅
-- `minimalist-background.png` ✅
-- `minimalist-background.webp` ✅
+4. **Se a imagem tiver outro nome:**
+   - Ajuste o caminho no arquivo `constants.ts` conforme o nome do arquivo
 
-**Nota:** A imagem será carregada automaticamente em todas as telas (Login, Experimentar, Resultado) com um estilo minimalista elegante que combina com o design do Modelo 3.
