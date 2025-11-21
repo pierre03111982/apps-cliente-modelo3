@@ -85,11 +85,18 @@ export function ExperimentarView({
     <div className="relative min-h-screen w-full overflow-x-hidden overflow-y-auto bg-zinc-950 text-white">
       {/* 1. Imagem de Fundo com Desfoque e Overlay - Fixa */}
       <div className="fixed inset-0 z-0 overflow-hidden">
-        <img
-          src="/background.jpg"
-          alt="Closet de fundo"
-          className="absolute inset-0 h-full w-full object-cover blur-[2px] brightness-50 opacity-40"
-        />
+        <video
+          src="/background.mp4"
+          loop
+          muted
+          autoPlay
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+        >
+          <source src="/background.webm" type="video/webm" />
+          <source src="/background.mp4" type="video/mp4" />
+          Seu navegador não suporta a tag de vídeo.
+        </video>
       </div>
 
       {/* 2. Conteúdo Principal */}

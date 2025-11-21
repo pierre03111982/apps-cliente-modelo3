@@ -610,13 +610,20 @@ export default function ResultadoPage() {
 
   return (
     <div className="relative min-h-screen w-screen overflow-hidden bg-zinc-950 text-white">
-      {/* Imagem de Fundo - Fixa */}
+      {/* Vídeo de Fundo - Fixa */}
       <div className="fixed inset-0 z-0 overflow-hidden">
-        <img
-          src="/background.jpg"
-          alt="Guarda-roupa de luxo"
-          className="absolute inset-0 h-full w-full object-cover blur-[2px] brightness-50 opacity-40"
-        />
+        <video
+          src="/background.mp4"
+          loop
+          muted
+          autoPlay
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+        >
+          <source src="/background.webm" type="video/webm" />
+          <source src="/background.mp4" type="video/mp4" />
+          Seu navegador não suporta a tag de vídeo.
+        </video>
       </div>
 
       {/* Conteúdo Principal */}
@@ -716,7 +723,7 @@ export default function ResultadoPage() {
                   onClick={handleShare}
                   className="flex items-center justify-center gap-2 rounded-xl bg-blue-600/80 py-3 font-semibold text-white text-sm border-2 border-blue-500/50"
                 >
-                  <Share2 className="h-4 w-4" /> Compartilhar
+                  <Share2 className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setShowFavoritesModal(true)}
